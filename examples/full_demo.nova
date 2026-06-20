@@ -1,0 +1,23 @@
+// NOVA v0.1 Demo
+
+name: S = "Varun"
+age: N = 19
+height: N = 182.4
+score: N
+
+score = 100
+age = age + 1
+height = height + 4.5
+
+print(name)
+print(age)
+print(height)
+print(score)
+print(age + score)
+print(age * 2)
+
+print((5 + 3) * 2)
+print(age + 3 * 2)
+print((age + 3) * 2)
+
+print("DONE")

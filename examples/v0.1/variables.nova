@@ -1,0 +1,5 @@
+name: S = "Varun"
+age: N = 19
+
+print(name)
+print(age)

@@ -1,0 +1,5 @@
+name: S = "Varun"
+
+name = 100
+
+// Expected: Datatype mismatch.

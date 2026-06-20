@@ -1,4 +1,4 @@
-from .runtime_values import (
+from nova.interpreter.runtime_values import (
     NumberValue,
     StringValue,
 )

@@ -1,6 +1,6 @@
-from ..lexer.token_types import TokenType
+from nova.lexer.token_types import TokenType
 
-from .ast_nodes import (
+from nova.parser.ast_nodes import (
     Program,
     VariableDeclaration,
     Assignment,

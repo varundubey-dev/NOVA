@@ -1,7 +1,20 @@
+# Virtual environment
 .venv/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Packaging
+*.egg-info/
+build/
+dist/
+
+# VS Code
 .vscode/
+
+# JetBrains
 .idea/
 
+# docs
 docs/temp

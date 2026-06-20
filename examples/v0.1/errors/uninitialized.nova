@@ -1,0 +1,5 @@
+name: S
+
+print(name)
+
+// Expected: Variable 'name' accessed before initialization.

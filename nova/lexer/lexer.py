@@ -1,5 +1,5 @@
-from .token import Token
-from .token_types import TokenType
+from nova.lexer.token import Token
+from nova.lexer.token_types import TokenType
 
 KEYWORDS = {"print": TokenType.PRINT}
 

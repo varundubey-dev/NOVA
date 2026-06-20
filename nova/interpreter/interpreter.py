@@ -1,11 +1,11 @@
-from .environment import Environment
+from nova.interpreter.environment import Environment
 
-from .runtime_values import (
+from nova.interpreter.runtime_values import (
     NumberValue,
     StringValue,
 )
 
-from ..parser.ast_nodes import (
+from nova.parser.ast_nodes import (
     Program,
     VariableDeclaration,
     Assignment,

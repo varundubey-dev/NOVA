@@ -1,0 +1,11 @@
+age: N = 19
+
+print(age)
+
+age = age + 1
+
+print(age)
+
+age = age + 10
+
+print(age)

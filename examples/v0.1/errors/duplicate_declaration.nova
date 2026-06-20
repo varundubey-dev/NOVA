@@ -1,0 +1,5 @@
+age: N = 19
+
+age: N = 20
+
+// Expected: Variable 'age' already declared.
