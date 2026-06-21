@@ -3,12 +3,16 @@ from nova.lexer.token_types import TokenType
 from nova.parser.ast_nodes import (
     Program,
     VariableDeclaration,
+    ConstantDeclaration,
     Assignment,
     PrintStatement,
     Identifier,
     NumberLiteral,
     StringLiteral,
+    BooleanLiteral,
+    NullLiteral,
     BinaryExpression,
+    UnaryExpression,
 )
 
 
@@ -42,7 +46,10 @@ class Parser:
 
         if self.current_token.type != expected_type:
             raise Exception(
-                f"Expected {expected_type.name}, " f"got {self.current_token.type.name}"
+                f"Expected {expected_type.name}, "
+                f"got {self.current_token.type.name} "
+                f"at line {self.current_token.line}, "
+                f"column {self.current_token.column}"
             )
 
         token = self.current_token
@@ -67,7 +74,7 @@ class Parser:
 
     def parse_statement(self):
         if self.current_token is None:
-            raise Exception("Unexpected EOF")
+            raise Exception("Unexpected EOF while parsing statement")
 
         if self.current_token.type == TokenType.PRINT:
             return self.parse_print_statement()
@@ -76,15 +83,22 @@ class Parser:
             next_token = self.peek()
 
             if next_token is None:
-                raise Exception("Unexpected EOF")
+                raise Exception("Unexpected EOF while parsing statement")
 
             if next_token.type == TokenType.COLON:
                 return self.parse_variable_declaration()
 
+            if next_token.type == TokenType.DOUBLE_COLON:
+                return self.parse_constant_declaration()
+
             if next_token.type == TokenType.EQUALS:
                 return self.parse_assignment()
 
-        raise Exception(f"Unexpected token {self.current_token.type.name}")
+        raise Exception(
+            f"Unexpected token {self.current_token.type.name} "
+            f"at line {self.current_token.line}, "
+            f"column {self.current_token.column}"
+        )
 
     def parse_variable_declaration(self):
         name_token = self.consume(TokenType.IDENTIFIER)
@@ -105,6 +119,29 @@ class Parser:
 
         return VariableDeclaration(
             name=name_token.value, var_type=type_token.value, value=value
+        )
+
+    def parse_constant_declaration(self):
+        name_token = self.consume(TokenType.IDENTIFIER)
+
+        self.consume(TokenType.DOUBLE_COLON)
+
+        type_token = self.consume(TokenType.TYPE)
+
+        value = None
+
+        if (
+            self.current_token is not None
+            and self.current_token.type == TokenType.EQUALS
+        ):
+            self.advance()
+
+            value = self.parse_expression()
+
+        return ConstantDeclaration(
+            name=name_token.value,
+            const_type=type_token.value,
+            value=value,
         )
 
     def parse_assignment(self):
@@ -128,7 +165,78 @@ class Parser:
         return PrintStatement(expression)
 
     def parse_expression(self):
-        left = self.parse_term()
+        return self.parse_or()
+
+    def parse_or(self):
+        left = self.parse_and()
+
+        while (
+            self.current_token is not None and self.current_token.type == TokenType.OR
+        ):
+            operator = self.current_token.value
+
+            self.advance()
+
+            right = self.parse_and()
+
+            left = BinaryExpression(left, operator, right)
+
+        return left
+
+    def parse_and(self):
+        left = self.parse_equality()
+
+        while (
+            self.current_token is not None and self.current_token.type == TokenType.AND
+        ):
+            operator = self.current_token.value
+
+            self.advance()
+
+            right = self.parse_equality()
+
+            left = BinaryExpression(left, operator, right)
+
+        return left
+
+    def parse_equality(self):
+        left = self.parse_comparison()
+
+        while self.current_token is not None and self.current_token.type in (
+            TokenType.EQUAL_EQUAL,
+            TokenType.NOT_EQUAL,
+        ):
+            operator = self.current_token.value
+
+            self.advance()
+
+            right = self.parse_comparison()
+
+            left = BinaryExpression(left, operator, right)
+
+        return left
+
+    def parse_comparison(self):
+        left = self.parse_additive()
+
+        while self.current_token is not None and self.current_token.type in (
+            TokenType.LESS,
+            TokenType.GREATER,
+            TokenType.LESS_EQUAL,
+            TokenType.GREATER_EQUAL,
+        ):
+            operator = self.current_token.value
+
+            self.advance()
+
+            right = self.parse_additive()
+
+            left = BinaryExpression(left, operator, right)
+
+        return left
+
+    def parse_additive(self):
+        left = self.parse_multiplicative()
 
         while self.current_token is not None and self.current_token.type in (
             TokenType.PLUS,
@@ -138,32 +246,45 @@ class Parser:
 
             self.advance()
 
-            right = self.parse_term()
+            right = self.parse_multiplicative()
 
             left = BinaryExpression(left, operator, right)
 
         return left
 
-    def parse_term(self):
-        left = self.parse_factor()
+    def parse_multiplicative(self):
+        left = self.parse_unary()
 
         while self.current_token is not None and self.current_token.type in (
             TokenType.STAR,
             TokenType.SLASH,
+            TokenType.MODULO,
         ):
             operator = self.current_token.value
 
             self.advance()
 
-            right = self.parse_factor()
+            right = self.parse_unary()
 
             left = BinaryExpression(left, operator, right)
 
         return left
 
-    def parse_factor(self):
+    def parse_unary(self):
+        if self.current_token is not None and self.current_token.type == TokenType.NOT:
+            operator = self.current_token.value
+
+            self.advance()
+
+            operand = self.parse_unary()
+
+            return UnaryExpression(operator, operand)
+
+        return self.parse_primary()
+
+    def parse_primary(self):
         if self.current_token is None:
-            raise Exception("Unexpected EOF")
+            raise Exception("Unexpected EOF while parsing expression")
 
         token = self.current_token
 
@@ -174,6 +295,14 @@ class Parser:
         if token.type == TokenType.STRING:
             self.advance()
             return StringLiteral(token.value)
+
+        if token.type == TokenType.BOOLEAN:
+            self.advance()
+            return BooleanLiteral(token.value)
+
+        if token.type == TokenType.NULL:
+            self.advance()
+            return NullLiteral()
 
         if token.type == TokenType.IDENTIFIER:
             self.advance()
@@ -188,4 +317,8 @@ class Parser:
 
             return expression
 
-        raise Exception(f"Unexpected token {token.type.name}")
+        raise Exception(
+            f"Unexpected token {token.type.name} "
+            f"at line {token.line}, "
+            f"column {token.column}"
+        )
