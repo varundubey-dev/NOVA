@@ -107,6 +107,45 @@ class NullLiteral(Expression):
         return "NullLiteral()"
 
 
+class ArrayType(Node):
+    def __init__(self, element_types):
+        self.element_types = element_types
+
+    def __repr__(self):
+        return f"ArrayType({self.element_types})"
+
+
+class ArrayLiteral(Expression):
+    def __init__(self, elements):
+        self.elements = elements
+
+    def __repr__(self):
+        return f"ArrayLiteral({self.elements})"
+
+
+class ArrayAccess(Expression):
+    def __init__(self, array, index):
+        self.array = array
+        self.index = index
+
+    def __repr__(self):
+        return f"ArrayAccess(" f"array={self.array}, " f"index={self.index}" f")"
+
+
+class ArrayAssignment(Statement):
+    def __init__(self, target, value):
+        self.target = target
+        self.value = value
+
+    def __repr__(self):
+        return (
+            f"ArrayAssignment("
+            f"target={self.target}, "
+            f"value={self.value}"
+            f")"
+        )
+
+
 class BinaryExpression(Expression):
     def __init__(self, left, operator, right):
         self.left = left

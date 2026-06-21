@@ -11,6 +11,10 @@ from nova.parser.ast_nodes import (
     StringLiteral,
     BooleanLiteral,
     NullLiteral,
+    ArrayType,
+    ArrayLiteral,
+    ArrayAccess,
+    ArrayAssignment,
     BinaryExpression,
     UnaryExpression,
 )
@@ -91,6 +95,10 @@ class Parser:
             if next_token.type == TokenType.DOUBLE_COLON:
                 return self.parse_constant_declaration()
 
+            if next_token.type == TokenType.LBRACKET:
+                if self.is_array_assignment():
+                    return self.parse_array_assignment()
+
             if next_token.type == TokenType.EQUALS:
                 return self.parse_assignment()
 
@@ -105,7 +113,7 @@ class Parser:
 
         self.consume(TokenType.COLON)
 
-        type_token = self.consume(TokenType.TYPE)
+        var_type = self.parse_type()
 
         value = None
 
@@ -118,7 +126,9 @@ class Parser:
             value = self.parse_expression()
 
         return VariableDeclaration(
-            name=name_token.value, var_type=type_token.value, value=value
+            name=name_token.value,
+            var_type=var_type,
+            value=value,
         )
 
     def parse_constant_declaration(self):
@@ -126,7 +136,7 @@ class Parser:
 
         self.consume(TokenType.DOUBLE_COLON)
 
-        type_token = self.consume(TokenType.TYPE)
+        const_type = self.parse_type()
 
         value = None
 
@@ -140,7 +150,154 @@ class Parser:
 
         return ConstantDeclaration(
             name=name_token.value,
-            const_type=type_token.value,
+            const_type=const_type,
+            value=value,
+        )
+
+    def parse_type(self):
+        if self.current_token is None:
+            raise Exception("Unexpected EOF while parsing type")
+
+        if self.current_token.type == TokenType.TYPE:
+            token = self.current_token
+
+            self.advance()
+
+            return token.value
+
+        if self.current_token.type == TokenType.LBRACKET:
+            return self.parse_array_type()
+
+        raise Exception(
+            f"Expected type at line {self.current_token.line}, "
+            f"column {self.current_token.column}"
+        )
+
+    def parse_array_type(self):
+        self.consume(TokenType.LBRACKET)
+
+        element_types = []
+
+        while True:
+            element_types.append(self.parse_type())
+
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.COMMA
+            ):
+                self.advance()
+                continue
+
+            break
+
+        self.consume(TokenType.RBRACKET)
+
+        return ArrayType(element_types)
+
+    def parse_array_literal(self):
+        self.consume(TokenType.LBRACKET)
+
+        elements = []
+
+        self.skip_newlines()
+
+        # Empty array: []
+        if (
+            self.current_token is not None
+            and self.current_token.type == TokenType.RBRACKET
+        ):
+            self.advance()
+
+            return ArrayLiteral(elements)
+
+        while True:
+            self.skip_newlines()
+
+            elements.append(self.parse_expression())
+
+            self.skip_newlines()
+
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.COMMA
+            ):
+                self.advance()
+
+                self.skip_newlines()
+
+                continue
+
+            break
+
+        self.consume(TokenType.RBRACKET)
+
+        return ArrayLiteral(elements)
+
+    def skip_newlines(self):
+        while (
+            self.current_token is not None
+            and self.current_token.type == TokenType.NEWLINE
+        ):
+            self.advance()
+
+    def parse_array_access(self, expression):
+        while (
+            self.current_token is not None
+            and self.current_token.type == TokenType.LBRACKET
+        ):
+            self.advance()
+
+            index = self.parse_expression()
+
+            self.consume(TokenType.RBRACKET)
+
+            expression = ArrayAccess(
+                array=expression,
+                index=index,
+            )
+
+        return expression
+
+    def is_array_assignment(self):
+        pos = self.position + 1
+
+        bracket_depth = 0
+
+        while pos < len(self.tokens):
+            token = self.tokens[pos]
+
+            if token.type == TokenType.LBRACKET:
+                bracket_depth += 1
+
+            elif token.type == TokenType.RBRACKET:
+                bracket_depth -= 1
+
+                if bracket_depth == 0:
+                    next_pos = pos + 1
+
+                    if (
+                        next_pos < len(self.tokens)
+                        and self.tokens[next_pos].type == TokenType.EQUALS
+                    ):
+                        return True
+
+                    return False
+
+            pos += 1
+
+        return False
+
+    def parse_array_assignment(self):
+        target = Identifier(self.consume(TokenType.IDENTIFIER).value)
+
+        target = self.parse_array_access(target)
+
+        self.consume(TokenType.EQUALS)
+
+        value = self.parse_expression()
+
+        return ArrayAssignment(
+            target=target,
             value=value,
         )
 
@@ -304,9 +461,13 @@ class Parser:
             self.advance()
             return NullLiteral()
 
+        if token.type == TokenType.LBRACKET:
+            return self.parse_array_literal()
+
         if token.type == TokenType.IDENTIFIER:
             self.advance()
-            return Identifier(token.value)
+            expression = Identifier(token.value)
+            return self.parse_array_access(expression)
 
         if token.type == TokenType.LPAREN:
             self.advance()
