@@ -1,0 +1,11 @@
+// Expected Output:
+// 3.14159
+// 1.0
+
+PI:: N = 3.14159
+
+VERSION:: S
+VERSION = "1.0"
+
+print(PI)
+print(VERSION)

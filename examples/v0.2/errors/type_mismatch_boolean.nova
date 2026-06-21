@@ -1,0 +1,6 @@
+// Expected Error:
+// Datatype mismatch.
+
+flag: B = true
+
+flag = 123

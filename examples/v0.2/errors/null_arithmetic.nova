@@ -1,0 +1,6 @@
+// Expected Error:
+// Cannot perform operations on null.
+
+value: U = null
+
+print(value + 5)

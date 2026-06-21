@@ -1,0 +1,6 @@
+// Expected Error:
+// Variable 'VERSION' accessed before initialization.
+
+VERSION:: S
+
+print(VERSION)

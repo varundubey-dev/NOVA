@@ -1,0 +1,11 @@
+// Expected Output:
+// true
+// true
+// true
+
+a: B = true
+b: B = false
+
+print(a || b)
+print(a && true)
+print(!b)

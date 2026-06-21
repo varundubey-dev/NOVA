@@ -1,0 +1,9 @@
+// Expected Output:
+// true
+// false
+
+isCoder: B = true
+isBlocked: B = false
+
+print(isCoder)
+print(isBlocked)

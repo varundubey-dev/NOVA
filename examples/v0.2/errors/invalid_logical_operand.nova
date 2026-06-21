@@ -1,0 +1,4 @@
+// Expected Error:
+// Left operand must be boolean.
+
+print(5 && true)

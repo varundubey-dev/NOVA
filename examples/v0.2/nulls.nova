@@ -1,0 +1,9 @@
+// Expected Output:
+// null
+// true
+
+name: S = null
+
+print(name)
+
+print(null == null)

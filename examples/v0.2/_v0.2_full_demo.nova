@@ -1,0 +1,30 @@
+// Expected Output:
+// Varun
+// true
+// 15
+// true
+// true
+// null
+// 3.14159
+
+name: S = "Varun"
+
+age: N = 19
+
+isAdult: B = age >= 18
+
+sum: N = 10 + 5
+
+result: B = true && true
+
+nothing: U = null
+
+PI:: N = 3.14159
+
+print(name)
+print(isAdult)
+print(sum)
+print(result)
+print(null == null)
+print(nothing)
+print(PI)

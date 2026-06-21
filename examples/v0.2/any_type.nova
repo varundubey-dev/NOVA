@@ -1,0 +1,13 @@
+// Expected Output:
+// Hello
+// 100
+// false
+
+value: U = "Hello"
+print(value)
+
+value = 100
+print(value)
+
+value = false
+print(value)
