@@ -5,6 +5,7 @@ from nova.interpreter.runtime_values import (
     StringValue,
     BooleanValue,
     NullValue,
+    ArrayValue,
 )
 
 from nova.parser.ast_nodes import (
@@ -18,6 +19,9 @@ from nova.parser.ast_nodes import (
     StringLiteral,
     BooleanLiteral,
     NullLiteral,
+    ArrayLiteral,
+    ArrayAccess,
+    ArrayAssignment,
     BinaryExpression,
     UnaryExpression,
 )
@@ -57,6 +61,15 @@ class Interpreter:
 
         if isinstance(node, NullLiteral):
             return self.visit_null_literal(node)
+
+        if isinstance(node, ArrayLiteral):
+            return self.visit_array_literal(node)
+
+        if isinstance(node, ArrayAccess):
+            return self.visit_array_access(node)
+
+        if isinstance(node, ArrayAssignment):
+            return self.visit_array_assignment(node)
 
         if isinstance(node, Identifier):
             return self.visit_identifier(node)
@@ -118,11 +131,7 @@ class Interpreter:
     def visit_print_statement(self, node):
         value = self.visit(node.expression)
 
-        if isinstance(value, NullValue):
-            print("null")
-        else:
-            print(value.value)
-
+        print(self.format_value(value))
         return value
 
     def visit_number_literal(self, node):
@@ -276,3 +285,162 @@ class Interpreter:
                 return BooleanValue(left.value or right.value)
 
         raise Exception(f"Unknown operator '{node.operator}'")
+
+    def visit_array_literal(self, node):
+        elements = []
+
+        for element in node.elements:
+            elements.append(self.visit(element))
+
+        return ArrayValue(elements)
+
+    def visit_array_access(self, node):
+        array = self.visit(node.array)
+
+        if not isinstance(array, ArrayValue):
+            raise Exception("Cannot index non-array value.")
+
+        index = self.visit(node.index)
+
+        if not isinstance(index, NumberValue):
+            raise Exception("Array index must be numeric.")
+
+        if not isinstance(index.value, int):
+            raise Exception("Array index must be an integer.")
+
+        try:
+            return array.value[index.value]
+
+        except IndexError:
+            raise Exception("Array index out of bounds.")
+
+    def visit_array_assignment(self, node):
+        target = node.target
+
+        if not isinstance(target, ArrayAccess):
+            raise Exception("Invalid array assignment.")
+
+        root = self.get_array_root(target)
+
+        if not isinstance(root, Identifier):
+            raise Exception("Invalid assignment target.")
+
+        variable_info = self.environment.get_variable_info(root.name)
+
+        if variable_info["constant"]:
+            raise Exception("Cannot modify immutable collection.")
+
+        array = self.visit(target.array)
+
+        if not isinstance(array, ArrayValue):
+            raise Exception("Cannot index non-array value.")
+
+        index = self.visit(target.index)
+
+        if not isinstance(index, NumberValue):
+            raise Exception("Array index must be numeric.")
+
+        if not isinstance(index.value, int):
+            raise Exception("Array index must be an integer.")
+
+        value = self.visit(node.value)
+
+        declared_type = variable_info["type"]
+
+        depth = self.get_array_depth(target)
+
+        expected_type = self.get_element_type(
+            declared_type,
+            depth,
+        )
+
+        # Multi-type arrays: [N,S]
+        if hasattr(expected_type, "element_types"):
+            valid = False
+
+            for allowed_type in expected_type.element_types:
+                try:
+                    self.environment.validate_type(
+                        allowed_type,
+                        value,
+                    )
+
+                    valid = True
+                    break
+
+                except Exception:
+                    pass
+
+            if not valid:
+                raise Exception("Datatype mismatch.")
+
+        else:
+            self.environment.validate_type(
+                expected_type,
+                value,
+            )
+
+        try:
+            array.value[index.value] = value
+
+        except IndexError:
+            raise Exception("Array index out of bounds.")
+
+        return value
+
+    def get_array_root(self, target):
+        current = target
+
+        while isinstance(current, ArrayAccess):
+            current = current.array
+
+        return current
+
+    def get_element_type(self, array_type, depth):
+        current = array_type
+
+        for _ in range(depth):
+            if not hasattr(current, "element_types"):
+                return current
+
+            # Multi-type array element
+            if len(current.element_types) > 1:
+                return current
+
+            current = current.element_types[0]
+
+        return current
+
+    def get_array_depth(self, target):
+        depth = 0
+
+        current = target
+
+        while isinstance(current, ArrayAccess):
+            depth += 1
+            current = current.array
+
+        return depth
+
+    def format_value(self, value):
+        if isinstance(value, NumberValue):
+            return str(value.value)
+
+        if isinstance(value, StringValue):
+            return value.value
+
+        if isinstance(value, BooleanValue):
+            return "true" if value.value else "false"
+
+        if isinstance(value, NullValue):
+            return "null"
+
+        if isinstance(value, ArrayValue):
+            elements = [
+                self.format_value(element)
+                for element in value.value
+            ]
+
+            return "[" + ", ".join(elements) + "]"
+
+        return str(value)

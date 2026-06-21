@@ -3,7 +3,10 @@ from nova.interpreter.runtime_values import (
     StringValue,
     BooleanValue,
     NullValue,
+    ArrayValue,
 )
+
+from nova.parser.ast_nodes import ArrayType
 
 
 class Environment:
@@ -17,20 +20,54 @@ class Environment:
         if isinstance(value, NullValue):
             return
 
+        # Primitive Any
         if expected_type == "U":
             return
 
+        # Primitive Types
         if expected_type == "N":
             if not isinstance(value, NumberValue):
                 raise Exception("Datatype mismatch.")
+            return
 
-        elif expected_type == "S":
+        if expected_type == "S":
             if not isinstance(value, StringValue):
                 raise Exception("Datatype mismatch.")
+            return
 
-        elif expected_type == "B":
+        if expected_type == "B":
             if not isinstance(value, BooleanValue):
                 raise Exception("Datatype mismatch.")
+            return
+
+        # Array Types
+        if isinstance(expected_type, ArrayType):
+            if not isinstance(value, ArrayValue):
+                raise Exception("Datatype mismatch.")
+
+            allowed_types = expected_type.element_types
+
+            for element in value.value:
+                valid = False
+
+                for allowed_type in allowed_types:
+                    try:
+                        self.validate_type(
+                            allowed_type,
+                            element,
+                        )
+                        valid = True
+                        break
+
+                    except Exception:
+                        pass
+
+                if not valid:
+                    raise Exception("Invalid datatype inside array.")
+
+            return
+
+        raise Exception(f"Unknown datatype '{expected_type}'.")
 
     def declare_variable(self, name, var_type, value=None):
         if name in self.variables:
@@ -74,6 +111,14 @@ class Environment:
 
         variable["value"] = value
         variable["initialized"] = True
+        
+    def get_variable_info(self, name):
+        if name not in self.variables:
+            raise Exception(
+                f"Variable '{name}' is not declared."
+            )
+
+        return self.variables[name]
 
     def get_variable(self, name):
         if name not in self.variables:

@@ -262,26 +262,33 @@ class Parser:
         pos = self.position + 1
 
         bracket_depth = 0
+        seen_brackets = False
 
         while pos < len(self.tokens):
             token = self.tokens[pos]
 
             if token.type == TokenType.LBRACKET:
                 bracket_depth += 1
+                seen_brackets = True
 
             elif token.type == TokenType.RBRACKET:
                 bracket_depth -= 1
 
-                if bracket_depth == 0:
-                    next_pos = pos + 1
+            elif (
+                seen_brackets and bracket_depth == 0 and token.type == TokenType.EQUALS
+            ):
+                return True
 
-                    if (
-                        next_pos < len(self.tokens)
-                        and self.tokens[next_pos].type == TokenType.EQUALS
-                    ):
-                        return True
-
-                    return False
+            elif (
+                seen_brackets
+                and bracket_depth == 0
+                and token.type
+                not in (
+                    TokenType.LBRACKET,
+                    TokenType.EQUALS,
+                )
+            ):
+                return False
 
             pos += 1
 
