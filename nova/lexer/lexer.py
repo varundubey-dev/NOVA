@@ -1,9 +1,14 @@
 from nova.lexer.token import Token
 from nova.lexer.token_types import TokenType
 
-KEYWORDS = {"print": TokenType.PRINT}
+KEYWORDS = {
+    "print": TokenType.PRINT,
+    "true": TokenType.BOOLEAN,
+    "false": TokenType.BOOLEAN,
+    "null": TokenType.NULL,
+}
 
-TYPES = {"S", "N"}
+TYPES = {"S", "N", "B", "U"}
 
 
 class Lexer:
@@ -54,6 +59,15 @@ class Lexer:
         ):
             value += self.current_char
             self.advance()
+
+        if value == "true":
+            return Token(TokenType.BOOLEAN, True, start_line, start_column)
+
+        if value == "false":
+            return Token(TokenType.BOOLEAN, False, start_line, start_column)
+
+        if value == "null":
+            return Token(TokenType.NULL, None, start_line, start_column)
 
         if value in KEYWORDS:
             return Token(KEYWORDS[value], value, start_line, start_column)
@@ -166,6 +180,49 @@ class Lexer:
             line = self.line
             column = self.column
 
+            # =====================
+            # Two-character tokens
+            # =====================
+
+            if self.current_char == "=" and self.peek() == "=":
+                self.advance()
+                self.advance()
+                return Token(TokenType.EQUAL_EQUAL, "==", line, column)
+
+            if self.current_char == "!" and self.peek() == "=":
+                self.advance()
+                self.advance()
+                return Token(TokenType.NOT_EQUAL, "!=", line, column)
+
+            if self.current_char == "<" and self.peek() == "=":
+                self.advance()
+                self.advance()
+                return Token(TokenType.LESS_EQUAL, "<=", line, column)
+
+            if self.current_char == ">" and self.peek() == "=":
+                self.advance()
+                self.advance()
+                return Token(TokenType.GREATER_EQUAL, ">=", line, column)
+
+            if self.current_char == "&" and self.peek() == "&":
+                self.advance()
+                self.advance()
+                return Token(TokenType.AND, "&&", line, column)
+
+            if self.current_char == "|" and self.peek() == "|":
+                self.advance()
+                self.advance()
+                return Token(TokenType.OR, "||", line, column)
+
+            if self.current_char == ":" and self.peek() == ":":
+                self.advance()
+                self.advance()
+                return Token(TokenType.DOUBLE_COLON, "::", line, column)
+
+            # =====================
+            # One-character tokens
+            # =====================
+
             if self.current_char == "+":
                 self.advance()
                 return Token(TokenType.PLUS, "+", line, column)
@@ -181,6 +238,22 @@ class Lexer:
             if self.current_char == "/":
                 self.advance()
                 return Token(TokenType.SLASH, "/", line, column)
+
+            if self.current_char == "%":
+                self.advance()
+                return Token(TokenType.MODULO, "%", line, column)
+
+            if self.current_char == "<":
+                self.advance()
+                return Token(TokenType.LESS, "<", line, column)
+
+            if self.current_char == ">":
+                self.advance()
+                return Token(TokenType.GREATER, ">", line, column)
+
+            if self.current_char == "!":
+                self.advance()
+                return Token(TokenType.NOT, "!", line, column)
 
             if self.current_char == ":":
                 self.advance()
@@ -199,7 +272,8 @@ class Lexer:
                 return Token(TokenType.RPAREN, ")", line, column)
 
             raise Exception(
-                f"Unexpected character '{self.current_char}' at line {line}, column {column}"
+                f"Unexpected character '{self.current_char}' "
+                f"at line {line}, column {column}"
             )
 
         return Token(TokenType.EOF, None, self.line, self.column)
