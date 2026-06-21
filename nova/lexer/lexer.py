@@ -271,6 +271,18 @@ class Lexer:
                 self.advance()
                 return Token(TokenType.RPAREN, ")", line, column)
 
+            if self.current_char == "[":
+                self.advance()
+                return Token(TokenType.LBRACKET, "[", line, column)
+
+            if self.current_char == "]":
+                self.advance()
+                return Token(TokenType.RBRACKET, "]", line, column)
+
+            if self.current_char == ",":
+                self.advance()
+                return Token(TokenType.COMMA, ",", line, column)
+
             raise Exception(
                 f"Unexpected character '{self.current_char}' "
                 f"at line {line}, column {column}"

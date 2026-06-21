@@ -2,23 +2,23 @@
 
 ## v0.1 — Core Language
 
-[~] Variables
-[~] Strings
-[~] Numbers
-[~] Arithmetic Expressions
-[~] Output
-[~] Comments
+[+] Variables
+[+] Strings
+[+] Numbers
+[+] Arithmetic Expressions
+[+] Output
+[+] Comments
 
 ---
 
 ## v0.2 — Types & Constants
 
-[ ] Booleans
-[ ] Any Type (U)
-[ ] Constants
-[ ] Null Values
-[ ] Comparison Operators
-[ ] Logical Operators
+[+] Booleans
+[+] Any Type (U)
+[+] Constants
+[+] Null Values
+[+] Comparison Operators
+[+] Logical Operators
 
 ---
 
