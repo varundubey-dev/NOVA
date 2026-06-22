@@ -1,0 +1,415 @@
+from nova.interpreter.expressions import ExpressionInterpreter
+
+from nova.interpreter.runtime_values import (
+    NumberValue,
+    ArrayValue,
+    MapValue,
+)
+
+from nova.ast import (
+    Identifier,
+    ArrayAccess,
+    PropertyAccess,
+)
+
+from nova.errors import (
+    InvalidArrayAccessError,
+    InvalidArrayIndexError,
+    InvalidArrayAssignmentError,
+    InvalidOperandError,
+    DatatypeMismatchError,
+    ConstantReassignmentError,
+)
+
+
+class CollectionInterpreter(ExpressionInterpreter):
+
+    # Schemas
+
+    def visit_schema_declaration(self, node):
+        self.environment.declare_schema(
+            node.name,
+            node.schema,
+            node.line,
+            node.column,
+        )
+
+        return None
+
+    # Map Literals
+
+    def visit_map_literal(self, node):
+        properties = {}
+
+        for entry in node.entries:
+            properties[entry.key] = self.visit(entry.value)
+
+        return MapValue(properties)
+
+    # Array Literals
+
+    def visit_array_literal(self, node):
+        elements = []
+
+        for element in node.elements:
+            elements.append(self.visit(element))
+
+        return ArrayValue(elements)
+
+    # Property Access
+
+    def visit_property_access(self, node):
+        target = self.visit(node.target)
+
+        if not isinstance(target, MapValue):
+            raise InvalidOperandError(
+                "Cannot access property on non-map value.",
+                node.line,
+                node.column,
+            )
+
+        if node.property_name not in target.value:
+            raise InvalidOperandError(
+                f"Unknown property '{node.property_name}'.",
+                node.line,
+                node.column,
+            )
+
+        return target.value[node.property_name]
+
+    # Array Access
+
+    def visit_array_access(self, node):
+        array = self.visit(node.array)
+
+        if not isinstance(array, ArrayValue):
+            raise InvalidArrayAccessError(
+                "Cannot index non-array value.",
+                node.line,
+                node.column,
+            )
+
+        index = self.visit(node.index)
+
+        if not isinstance(index, NumberValue):
+            raise InvalidArrayIndexError(
+                "Array index must be numeric.",
+                node.line,
+                node.column,
+            )
+
+        if not isinstance(index.value, int):
+            raise InvalidArrayIndexError(
+                "Array index must be an integer.",
+                node.line,
+                node.column,
+            )
+
+        try:
+            return array.value[index.value]
+
+        except IndexError:
+            raise InvalidArrayIndexError(
+                "Array index out of bounds.",
+                node.line,
+                node.column,
+            )
+
+    # Property Assignment
+
+    def visit_property_assignment(self, node):
+        if self.is_immutable_collection(node.target):
+            raise ConstantReassignmentError(
+                "Cannot modify immutable collection.",
+                node.line,
+                node.column,
+            )
+
+        target = node.target
+
+        parent = self.visit(target.target)
+
+        if not isinstance(parent, MapValue):
+            raise InvalidOperandError(
+                "Cannot access property on non-map value.",
+                node.line,
+                node.column,
+            )
+
+        property_name = target.property_name
+
+        if property_name not in parent.value:
+            raise InvalidOperandError(
+                f"Unknown property '{property_name}'.",
+                node.line,
+                node.column,
+            )
+
+        value = self.visit(node.value)
+
+        field = self.get_property_schema_field(target)
+
+        self.environment.validate_type(
+            field.field_type,
+            value,
+            node.line,
+            node.column,
+        )
+
+        parent.value[property_name] = value
+
+        return value
+
+    # Array Assignment
+
+    def visit_array_assignment(self, node):
+        target = node.target
+
+        if not isinstance(target, ArrayAccess):
+            raise InvalidArrayAssignmentError(
+                "Invalid array assignment.",
+                node.line,
+                node.column,
+            )
+
+        if self.is_immutable_collection(target):
+            raise ConstantReassignmentError(
+                "Cannot modify immutable collection.",
+                node.line,
+                node.column,
+            )
+
+        array = self.visit(target.array)
+
+        if not isinstance(array, ArrayValue):
+            raise InvalidArrayAccessError(
+                "Cannot index non-array value.",
+                node.line,
+                node.column,
+            )
+
+        index = self.visit(target.index)
+
+        if not isinstance(index, NumberValue):
+            raise InvalidArrayIndexError(
+                "Array index must be numeric.",
+                node.line,
+                node.column,
+            )
+
+        if not isinstance(index.value, int):
+            raise InvalidArrayIndexError(
+                "Array index must be an integer.",
+                node.line,
+                node.column,
+            )
+
+        value = self.visit(node.value)
+
+        expected_type = self.get_array_assignment_type(target)
+
+        self.environment.validate_type(
+            expected_type,
+            value,
+            node.line,
+            node.column,
+        )
+
+        try:
+            array.value[index.value] = value
+
+        except IndexError:
+            raise InvalidArrayIndexError(
+                "Array index out of bounds.",
+                node.line,
+                node.column,
+            )
+
+        return value
+
+    # Helpers
+
+    def get_array_root(self, target):
+        current = target
+
+        while isinstance(current, ArrayAccess):
+            current = current.array
+
+        return current
+
+    def get_property_root(self, target):
+        current = target
+
+        while hasattr(current, "target"):
+            current = current.target
+
+        return current
+
+    def get_array_depth(self, target):
+        depth = 0
+
+        current = target
+
+        while isinstance(current, ArrayAccess):
+            depth += 1
+            current = current.array
+
+        return depth
+
+    def get_element_type(self, array_type, depth):
+        current = array_type
+
+        for _ in range(depth):
+            current = current.element_types[0]
+
+        return current
+
+    def is_immutable_collection(
+        self,
+        target,
+    ):
+        current = target
+
+        while True:
+
+            if isinstance(current, PropertyAccess):
+                current = current.target
+                continue
+
+            if isinstance(current, ArrayAccess):
+                current = current.array
+                continue
+
+            break
+
+        if not isinstance(current, Identifier):
+            return False
+
+        variable_info = self.environment.get_variable_info(
+            current.name,
+            target.line,
+            target.column,
+        )
+
+        return variable_info["constant"]
+
+    def get_property_schema_field(
+        self,
+        target,
+    ):
+        root = self.get_property_root(target)
+
+        if isinstance(root, Identifier):
+            variable_info = self.environment.get_variable_info(
+                root.name,
+                target.line,
+                target.column,
+            )
+
+            variable_type = variable_info["type"]
+
+        elif isinstance(root, ArrayAccess):
+            array_root = self.get_array_root(root)
+
+            variable_info = self.environment.get_variable_info(
+                array_root.name,
+                target.line,
+                target.column,
+            )
+
+            depth = self.get_array_depth(root)
+
+            variable_type = self.get_element_type(
+                variable_info["type"],
+                depth,
+            )
+
+        else:
+            raise DatatypeMismatchError(
+                "Invalid property access.",
+                target.line,
+                target.column,
+            )
+
+        schema = self.environment.get_schema(
+            variable_type,
+            target.line,
+            target.column,
+        )
+
+        chain = []
+
+        current = target
+
+        while isinstance(current, PropertyAccess):
+            chain.append(current.property_name)
+            current = current.target
+
+        chain.reverse()
+
+        current_schema = schema
+
+        for property_name in chain:
+            field_lookup = {field.name: field for field in current_schema.fields}
+
+            field = field_lookup.get(property_name)
+
+            if field is None:
+                raise DatatypeMismatchError(
+                    f"Unknown property '{property_name}'.",
+                    target.line,
+                    target.column,
+                )
+
+            if property_name == chain[-1]:
+                return field
+
+            current_schema = self.environment.get_schema(
+                field.field_type,
+                target.line,
+                target.column,
+            )
+
+        raise DatatypeMismatchError(
+            "Invalid property access.",
+            target.line,
+            target.column,
+        )
+
+    def get_array_assignment_type(self, target):
+        parent = target.array
+
+        if isinstance(parent, PropertyAccess):
+            field = self.get_property_schema_field(parent)
+            return field.field_type.element_types[0]
+
+        if isinstance(parent, ArrayAccess):
+            root = self.get_array_root(parent)
+
+            variable_info = self.environment.get_variable_info(
+                root.name,
+                target.line,
+                target.column,
+            )
+
+            depth = self.get_array_depth(target)
+
+            return self.get_element_type(
+                variable_info["type"],
+                depth,
+            )
+
+        root = self.get_array_root(target)
+
+        variable_info = self.environment.get_variable_info(
+            root.name,
+            target.line,
+            target.column,
+        )
+
+        depth = self.get_array_depth(target)
+
+        return self.get_element_type(
+            variable_info["type"],
+            depth,
+        )

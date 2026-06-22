@@ -1,5 +1,5 @@
-from nova.interpreter.arrays import ArrayInterpreter
+from nova.interpreter.collections import CollectionInterpreter
 
 
-class Interpreter(ArrayInterpreter):
+class Interpreter(CollectionInterpreter):
     pass

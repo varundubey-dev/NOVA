@@ -4,6 +4,7 @@ from nova.interpreter.runtime_values import (
     BooleanValue,
     NullValue,
     ArrayValue,
+    MapValue,
 )
 
 from nova.ast import ArrayType
@@ -20,6 +21,7 @@ from nova.errors import (
 class Environment:
     def __init__(self):
         self.variables = {}
+        self.schemas = {}
 
     def validate_type(
         self,
@@ -103,11 +105,102 @@ class Environment:
 
             return
 
+        # Schema Types
+
+        if isinstance(expected_type, str):
+            primitive_types = {
+                "N",
+                "S",
+                "B",
+                "U",
+            }
+
+            if expected_type not in primitive_types:
+                schema = self.get_schema(
+                    expected_type,
+                    line,
+                    column,
+                )
+
+                self.validate_schema_instance(
+                    schema,
+                    value,
+                    line,
+                    column,
+                )
+
+                return
+
         raise DatatypeMismatchError(
             f"Unknown datatype '{expected_type}'.",
             line,
             column,
         )
+
+    def get_schema(
+        self,
+        name,
+        line=None,
+        column=None,
+    ):
+        schema = self.schemas.get(name)
+
+        if schema is None:
+            raise DatatypeMismatchError(
+                f"Unknown schema '{name}'.",
+                line,
+                column,
+            )
+
+        return schema
+
+    def validate_schema_instance(
+        self,
+        schema,
+        value,
+        line=None,
+        column=None,
+    ):
+        if not isinstance(value, MapValue):
+            raise DatatypeMismatchError(
+                "Datatype mismatch.",
+                line,
+                column,
+            )
+
+        field_lookup = {field.name: field for field in schema.fields}
+
+        # Required fields
+
+        for field in schema.fields:
+            if not field.optional and field.name not in value.value:
+                raise DatatypeMismatchError(
+                    f"Missing required property '{field.name}'.",
+                    line,
+                    column,
+                )
+
+        # Unknown fields
+
+        for key in value.value:
+            if key not in field_lookup:
+                raise DatatypeMismatchError(
+                    f"Unknown property '{key}'.",
+                    line,
+                    column,
+                )
+
+        # Datatype validation
+
+        for key, runtime_value in value.value.items():
+            field = field_lookup[key]
+
+            self.validate_type(
+                field.field_type,
+                runtime_value,
+                line,
+                column,
+            )
 
     def declare_variable(
         self,
@@ -117,7 +210,7 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name in self.variables:
+        if name in self.variables or name in self.schemas:
             raise DuplicateDeclarationError(
                 f"Variable '{name}' already declared.",
                 line,
@@ -138,6 +231,22 @@ class Environment:
             "constant": False,
         }
 
+    def declare_schema(
+        self,
+        name,
+        schema,
+        line=None,
+        column=None,
+    ):
+        if name in self.schemas or name in self.variables:
+            raise DuplicateDeclarationError(
+                f"Schema '{name}' already declared.",
+                line,
+                column,
+            )
+
+        self.schemas[name] = schema
+
     def declare_constant(
         self,
         name,
@@ -146,7 +255,7 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name in self.variables:
+        if name in self.variables or name in self.schemas:
             raise DuplicateDeclarationError(
                 f"Variable '{name}' already declared.",
                 line,

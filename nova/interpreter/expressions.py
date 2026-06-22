@@ -6,6 +6,7 @@ from nova.interpreter.runtime_values import (
     BooleanValue,
     NullValue,
     ArrayValue,
+    MapValue,
 )
 
 from nova.errors import (
@@ -263,5 +264,13 @@ class ExpressionInterpreter(StatementInterpreter):
             elements = [self.format_value(element) for element in value.value]
 
             return "[" + ", ".join(elements) + "]"
+
+        if isinstance(value, MapValue):
+            properties = []
+
+            for key, property_value in value.value.items():
+                properties.append(f"{key} = {self.format_value(property_value)}")
+
+            return "{ " + ", ".join(properties) + " }"
 
         return str(value)

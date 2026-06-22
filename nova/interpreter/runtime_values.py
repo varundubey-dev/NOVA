@@ -36,3 +36,19 @@ class ArrayValue(RuntimeValue):
 
     def __repr__(self):
         return f"ArrayValue({self.value})"
+
+
+class SchemaValue(RuntimeValue):
+    def __init__(self, fields):
+        super().__init__(fields)
+
+    def __repr__(self):
+        return f"SchemaValue({self.value})"
+
+
+class MapValue(RuntimeValue):
+    def __init__(self, properties):
+        super().__init__(properties)
+
+    def __repr__(self):
+        return f"MapValue({self.value})"

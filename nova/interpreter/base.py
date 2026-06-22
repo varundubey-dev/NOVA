@@ -16,6 +16,10 @@ from nova.ast import (
     ArrayAssignment,
     BinaryExpression,
     UnaryExpression,
+    SchemaDeclaration,
+    MapLiteral,
+    PropertyAccess,
+    PropertyAssignment,
 )
 
 
@@ -38,6 +42,12 @@ class InterpreterBase:
 
         if isinstance(node, Assignment):
             return self.visit_assignment(node)
+
+        if isinstance(node, SchemaDeclaration):
+            return self.visit_schema_declaration(node)
+
+        if isinstance(node, PropertyAssignment):
+            return self.visit_property_assignment(node)
 
         if isinstance(node, PrintStatement):
             return self.visit_print_statement(node)
@@ -63,6 +73,12 @@ class InterpreterBase:
         if isinstance(node, ArrayAssignment):
             return self.visit_array_assignment(node)
 
+        if isinstance(node, MapLiteral):
+            return self.visit_map_literal(node)
+
+        if isinstance(node, PropertyAccess):
+            return self.visit_property_access(node)
+
         if isinstance(node, Identifier):
             return self.visit_identifier(node)
 
@@ -72,9 +88,7 @@ class InterpreterBase:
         if isinstance(node, BinaryExpression):
             return self.visit_binary_expression(node)
 
-        raise NotImplementedError(
-            f"Unknown node type: {type(node).__name__}"
-        )
+        raise NotImplementedError(f"Unknown node type: {type(node).__name__}")
 
     # -------------------------
     # Statement Visitors
@@ -90,6 +104,12 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_assignment(self, node):
+        raise NotImplementedError
+
+    def visit_schema_declaration(self, node):
+        raise NotImplementedError
+
+    def visit_property_assignment(self, node):
         raise NotImplementedError
 
     def visit_print_statement(self, node):
@@ -122,6 +142,12 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_binary_expression(self, node):
+        raise NotImplementedError
+
+    def visit_map_literal(self, node):
+        raise NotImplementedError
+
+    def visit_property_access(self, node):
         raise NotImplementedError
 
     # -------------------------

@@ -126,9 +126,8 @@ class Parser:
             if next_token.type == TokenType.DOUBLE_COLON:
                 return self.parse_constant_declaration()
 
-            if next_token.type == TokenType.LBRACKET:
-                if self.is_array_assignment():
-                    return self.parse_array_assignment()
+            if self.is_array_assignment():
+                return self.parse_array_assignment()
 
             if self.is_property_assignment():
                 return self.parse_property_assignment()
@@ -345,15 +344,19 @@ class Parser:
     def is_array_assignment(self):
         pos = self.position
 
+        seen_bracket = False
         last_meaningful = None
 
         while pos < len(self.tokens):
             token = self.tokens[pos]
 
-            if token.type == TokenType.EQUALS:
-                return last_meaningful == TokenType.RBRACKET
+            if token.type == TokenType.LBRACKET:
+                seen_bracket = True
 
-            if token.type not in (TokenType.NEWLINE,):
+            elif token.type == TokenType.EQUALS:
+                return seen_bracket and last_meaningful == TokenType.RBRACKET
+
+            elif token.type not in (TokenType.NEWLINE,):
                 last_meaningful = token.type
 
             if token.type == TokenType.EOF:

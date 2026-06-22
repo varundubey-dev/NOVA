@@ -41,6 +41,16 @@ class StatementInterpreter(InterpreterBase):
         )
 
         return value
+    
+    def visit_schema_declaration(self, node):
+        self.environment.declare_schema(
+            node.name,
+            node.schema,
+            node.line,
+            node.column,
+        )
+
+        return None
 
     def visit_assignment(self, node):
         value = self.visit(node.value)
