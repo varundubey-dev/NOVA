@@ -11,7 +11,7 @@ class Program(Statement):
         super().__init__(line, column)
 
         self.statements = statements
-        
+
     def __repr__(self):
         return f"Program({self.statements})"
 
@@ -98,6 +98,44 @@ class ArrayAssignment(Statement):
 
     def __repr__(self):
         return f"ArrayAssignment(" f"target={self.target}, " f"value={self.value}" f")"
+
+
+class SchemaDeclaration(Statement):
+    def __init__(
+        self,
+        name,
+        schema,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.name = name
+        self.schema = schema
+
+    def __repr__(self):
+        return (
+            f"SchemaDeclaration(" f"name={self.name!r}, " f"schema={self.schema}" f")"
+        )
+
+
+class PropertyAssignment(Statement):
+    def __init__(
+        self,
+        target,
+        value,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.target = target
+        self.value = value
+
+    def __repr__(self):
+        return (
+            f"PropertyAssignment(" f"target={self.target}, " f"value={self.value}" f")"
+        )
 
 
 class PrintStatement(Statement):

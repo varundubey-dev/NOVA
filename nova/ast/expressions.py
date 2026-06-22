@@ -33,6 +33,28 @@ class ArrayAccess(Expression):
         return f"ArrayAccess(" f"array={self.array}, " f"index={self.index}" f")"
 
 
+class PropertyAccess(Expression):
+    def __init__(
+        self,
+        target,
+        property_name,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.target = target
+        self.property_name = property_name
+
+    def __repr__(self):
+        return (
+            f"PropertyAccess("
+            f"target={self.target}, "
+            f"property_name={self.property_name!r}"
+            f")"
+        )
+
+
 class BinaryExpression(Expression):
     def __init__(
         self,

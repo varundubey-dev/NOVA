@@ -1,4 +1,5 @@
 from nova.ast.base import Expression
+from nova.ast.base import Node
 
 
 class NumberLiteral(Expression):
@@ -71,3 +72,35 @@ class ArrayLiteral(Expression):
 
     def __repr__(self):
         return f"ArrayLiteral({self.elements})"
+
+
+class MapEntry(Node):
+    def __init__(
+        self,
+        key,
+        value,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.key = key
+        self.value = value
+
+    def __repr__(self):
+        return f"MapEntry(" f"key={self.key!r}, " f"value={self.value}" f")"
+
+
+class MapLiteral(Expression):
+    def __init__(
+        self,
+        entries,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.entries = entries
+
+    def __repr__(self):
+        return f"MapLiteral({self.entries})"

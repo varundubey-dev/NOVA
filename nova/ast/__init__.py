@@ -10,12 +10,15 @@ from .statements import (
     ConstantDeclaration,
     Assignment,
     ArrayAssignment,
+    SchemaDeclaration,
+    PropertyAssignment,
     PrintStatement,
 )
 
 from .expressions import (
     Identifier,
     ArrayAccess,
+    PropertyAccess,
     BinaryExpression,
     UnaryExpression,
 )
@@ -26,30 +29,45 @@ from .literals import (
     BooleanLiteral,
     NullLiteral,
     ArrayLiteral,
+    MapEntry,
+    MapLiteral,
 )
 
 from .types import (
     ArrayType,
+    SchemaField,
+    SchemaType,
 )
 
 __all__ = [
     "Node",
     "Statement",
     "Expression",
+    # Statements
     "Program",
     "VariableDeclaration",
     "ConstantDeclaration",
     "Assignment",
     "ArrayAssignment",
+    "SchemaDeclaration",
+    "PropertyAssignment",
     "PrintStatement",
+    # Expressions
     "Identifier",
     "ArrayAccess",
+    "PropertyAccess",
     "BinaryExpression",
     "UnaryExpression",
+    # Literals
     "NumberLiteral",
     "StringLiteral",
     "BooleanLiteral",
     "NullLiteral",
     "ArrayLiteral",
+    "MapEntry",
+    "MapLiteral",
+    # Types
     "ArrayType",
+    "SchemaField",
+    "SchemaType",
 ]
