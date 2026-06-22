@@ -17,6 +17,13 @@ from nova.ast import (
     ArrayAssignment,
     BinaryExpression,
     UnaryExpression,
+    SchemaDeclaration,
+    SchemaType,
+    SchemaField,
+    MapLiteral,
+    MapEntry,
+    PropertyAccess,
+    PropertyAssignment,
 )
 
 from nova.errors import (
@@ -111,6 +118,9 @@ class Parser:
                 )
 
             if next_token.type == TokenType.COLON:
+                if self.is_schema_declaration():
+                    return self.parse_schema_declaration()
+
                 return self.parse_variable_declaration()
 
             if next_token.type == TokenType.DOUBLE_COLON:
@@ -119,6 +129,9 @@ class Parser:
             if next_token.type == TokenType.LBRACKET:
                 if self.is_array_assignment():
                     return self.parse_array_assignment()
+
+            if self.is_property_assignment():
+                return self.parse_property_assignment()
 
             if next_token.type == TokenType.EQUALS:
                 return self.parse_assignment()
@@ -189,6 +202,7 @@ class Parser:
                 last_token.column,
             )
 
+        # Built-in types
         if self.current_token.type == TokenType.TYPE:
             token = self.current_token
 
@@ -196,6 +210,15 @@ class Parser:
 
             return token.value
 
+        # User-defined schema types
+        if self.current_token.type == TokenType.IDENTIFIER:
+            token = self.current_token
+
+            self.advance()
+
+            return token.value
+
+        # Array types
         if self.current_token.type == TokenType.LBRACKET:
             return self.parse_array_type()
 
@@ -280,56 +303,60 @@ class Parser:
         ):
             self.advance()
 
-    def parse_array_access(self, expression):
-        while (
-            self.current_token is not None
-            and self.current_token.type == TokenType.LBRACKET
-        ):
-            self.advance()
+    def parse_postfix_expression(self, expression):
+        while self.current_token is not None:
 
-            index = self.parse_expression()
+            # Array access
+            if self.current_token.type == TokenType.LBRACKET:
+                self.advance()
 
-            self.consume(TokenType.RBRACKET)
+                index = self.parse_expression()
 
-            expression = ArrayAccess(
-                array=expression,
-                index=index,
-                line=expression.line,
-                column=expression.column,
-            )
+                self.consume(TokenType.RBRACKET)
+
+                expression = ArrayAccess(
+                    array=expression,
+                    index=index,
+                    line=expression.line,
+                    column=expression.column,
+                )
+
+                continue
+
+            # Property access
+            if self.current_token.type == TokenType.DOT:
+                self.advance()
+
+                property_token = self.consume(TokenType.IDENTIFIER)
+
+                expression = PropertyAccess(
+                    target=expression,
+                    property_name=property_token.value,
+                    line=expression.line,
+                    column=expression.column,
+                )
+
+                continue
+
+            break
 
         return expression
 
     def is_array_assignment(self):
-        pos = self.position + 1
+        pos = self.position
 
-        bracket_depth = 0
-        seen_brackets = False
+        last_meaningful = None
 
         while pos < len(self.tokens):
             token = self.tokens[pos]
 
-            if token.type == TokenType.LBRACKET:
-                bracket_depth += 1
-                seen_brackets = True
+            if token.type == TokenType.EQUALS:
+                return last_meaningful == TokenType.RBRACKET
 
-            elif token.type == TokenType.RBRACKET:
-                bracket_depth -= 1
+            if token.type not in (TokenType.NEWLINE,):
+                last_meaningful = token.type
 
-            elif (
-                seen_brackets and bracket_depth == 0 and token.type == TokenType.EQUALS
-            ):
-                return True
-
-            elif (
-                seen_brackets
-                and bracket_depth == 0
-                and token.type
-                not in (
-                    TokenType.LBRACKET,
-                    TokenType.EQUALS,
-                )
-            ):
+            if token.type == TokenType.EOF:
                 return False
 
             pos += 1
@@ -345,7 +372,7 @@ class Parser:
             column=name_token.column,
         )
 
-        target = self.parse_array_access(target)
+        target = self.parse_postfix_expression(target)
 
         self.consume(TokenType.EQUALS)
 
@@ -598,6 +625,9 @@ class Parser:
         if token.type == TokenType.LBRACKET:
             return self.parse_array_literal()
 
+        if token.type == TokenType.LBRACE:
+            return self.parse_map_literal()
+
         if token.type == TokenType.IDENTIFIER:
             self.advance()
             expression = Identifier(
@@ -605,7 +635,7 @@ class Parser:
                 line=token.line,
                 column=token.column,
             )
-            return self.parse_array_access(expression)
+            return self.parse_postfix_expression(expression)
 
         if token.type == TokenType.LPAREN:
             self.advance()
@@ -620,4 +650,226 @@ class Parser:
             f"Unexpected token {token.type.name}.",
             token.line,
             token.column,
+        )
+
+    def is_schema_declaration(self):
+        if self.current_token is None:
+            return False
+
+        if self.current_token.type != TokenType.IDENTIFIER:
+            return False
+
+        pos = self.position + 1
+
+        if pos >= len(self.tokens):
+            return False
+
+        if self.tokens[pos].type != TokenType.COLON:
+            return False
+
+        pos += 1
+
+        if pos >= len(self.tokens):
+            return False
+
+        token = self.tokens[pos]
+
+        return token.type == TokenType.TYPE and token.value == "M"
+
+    def parse_schema_declaration(self):
+        name_token = self.consume(TokenType.IDENTIFIER)
+
+        self.consume(TokenType.COLON)
+
+        map_type = self.consume(TokenType.TYPE)
+
+        if map_type.value != "M":
+            raise InvalidTypeError(
+                "Expected map schema type M.",
+                map_type.line,
+                map_type.column,
+            )
+
+        self.consume(TokenType.EQUALS)
+
+        schema = self.parse_schema_type()
+
+        return SchemaDeclaration(
+            name=name_token.value,
+            schema=schema,
+            line=name_token.line,
+            column=name_token.column,
+        )
+
+    def parse_schema_type(self):
+        lbrace = self.consume(TokenType.LBRACE)
+
+        fields = []
+
+        self.skip_newlines()
+
+        if (
+            self.current_token is not None
+            and self.current_token.type == TokenType.RBRACE
+        ):
+            self.advance()
+
+            return SchemaType(
+                fields,
+                line=lbrace.line,
+                column=lbrace.column,
+            )
+
+        while True:
+            self.skip_newlines()
+
+            field_name = self.consume(TokenType.IDENTIFIER)
+
+            optional = False
+
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.QUESTION
+            ):
+                optional = True
+                self.advance()
+
+            self.consume(TokenType.COLON)
+
+            field_type = self.parse_type()
+
+            fields.append(
+                SchemaField(
+                    name=field_name.value,
+                    field_type=field_type,
+                    optional=optional,
+                    line=field_name.line,
+                    column=field_name.column,
+                )
+            )
+
+            self.skip_newlines()
+
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.COMMA
+            ):
+                self.advance()
+                continue
+
+            break
+
+        self.skip_newlines()
+
+        self.consume(TokenType.RBRACE)
+
+        return SchemaType(
+            fields,
+            line=lbrace.line,
+            column=lbrace.column,
+        )
+
+    def parse_map_literal(self):
+        lbrace = self.consume(TokenType.LBRACE)
+
+        entries = []
+
+        self.skip_newlines()
+
+        if (
+            self.current_token is not None
+            and self.current_token.type == TokenType.RBRACE
+        ):
+            self.advance()
+
+            return MapLiteral(
+                entries,
+                line=lbrace.line,
+                column=lbrace.column,
+            )
+
+        while True:
+            self.skip_newlines()
+
+            key_token = self.consume(TokenType.IDENTIFIER)
+
+            self.consume(TokenType.EQUALS)
+
+            value = self.parse_expression()
+
+            entries.append(
+                MapEntry(
+                    key=key_token.value,
+                    value=value,
+                    line=key_token.line,
+                    column=key_token.column,
+                )
+            )
+
+            self.skip_newlines()
+
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.COMMA
+            ):
+                self.advance()
+                continue
+
+            break
+
+        self.skip_newlines()
+
+        self.consume(TokenType.RBRACE)
+
+        return MapLiteral(
+            entries,
+            line=lbrace.line,
+            column=lbrace.column,
+        )
+
+    def is_property_assignment(self):
+        pos = self.position
+
+        seen_property = False
+        last_meaningful = None
+
+        while pos < len(self.tokens):
+            token = self.tokens[pos]
+
+            if token.type == TokenType.DOT:
+                seen_property = True
+
+            elif token.type == TokenType.EQUALS:
+                return seen_property and last_meaningful != TokenType.RBRACKET
+
+            elif token.type not in (TokenType.NEWLINE,):
+                last_meaningful = token.type
+
+            if token.type == TokenType.EOF:
+                return False
+
+            pos += 1
+
+        return False
+
+    def parse_property_assignment(self):
+        name_token = self.consume(TokenType.IDENTIFIER)
+
+        target = Identifier(
+            name_token.value,
+            line=name_token.line,
+            column=name_token.column,
+        )
+
+        target = self.parse_postfix_expression(target)
+
+        self.consume(TokenType.EQUALS)
+
+        value = self.parse_expression()
+
+        return PropertyAssignment(
+            target=target,
+            value=value,
+            line=target.line,
+            column=target.column,
         )
