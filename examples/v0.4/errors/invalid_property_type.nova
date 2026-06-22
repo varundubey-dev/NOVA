@@ -1,0 +1,15 @@
+User: M = {
+    age: N
+}
+
+user: User = {
+    age = 19
+}
+
+user.age = "twenty"
+
+/*
+Expected Error:
+
+Datatype mismatch.
+*/

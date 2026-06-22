@@ -1,0 +1,28 @@
+Address: M = {
+    city: S,
+    country: S
+}
+
+User: M = {
+    name: S,
+    address: Address
+}
+
+user: User = {
+    name = "Varun",
+
+    address = {
+        city = "Mumbai",
+        country = "India"
+    }
+}
+
+print(user.address.city)
+print(user.address.country)
+
+/*
+Expected Output:
+
+Mumbai
+India
+*/

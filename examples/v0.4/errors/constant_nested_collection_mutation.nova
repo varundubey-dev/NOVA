@@ -1,0 +1,17 @@
+User: M = {
+    skills: [S]
+}
+
+admin:: User = {
+    skills = [
+        "Everything"
+    ]
+}
+
+admin.skills[0] = "Hack"
+
+/*
+Expected Error:
+
+Cannot modify immutable collection.
+*/

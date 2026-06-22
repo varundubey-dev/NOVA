@@ -1,0 +1,23 @@
+User: M = {
+    name: S,
+    skills: [S]
+}
+
+user: User = {
+    name = "Varun",
+
+    skills = [
+        "Python",
+        "TypeScript"
+    ]
+}
+
+print(user.skills[0])
+print(user.skills[1])
+
+/*
+Expected Output:
+
+Python
+TypeScript
+*/

@@ -1,0 +1,15 @@
+User: M = {
+    name: S
+}
+
+admin:: User = {
+    name = "Root"
+}
+
+admin.name = "Hack"
+
+/*
+Expected Error:
+
+Cannot modify immutable collection.
+*/

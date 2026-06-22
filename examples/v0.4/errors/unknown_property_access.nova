@@ -1,0 +1,15 @@
+User: M = {
+    name: S
+}
+
+user: User = {
+    name = "Varun"
+}
+
+print(user.city)
+
+/*
+Expected Error:
+
+Unknown property 'city'.
+*/

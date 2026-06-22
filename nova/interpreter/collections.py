@@ -6,11 +6,7 @@ from nova.interpreter.runtime_values import (
     MapValue,
 )
 
-from nova.ast import (
-    Identifier,
-    ArrayAccess,
-    PropertyAccess,
-)
+from nova.ast import Identifier, ArrayAccess, PropertyAccess, ArrayType
 
 from nova.errors import (
     InvalidArrayAccessError,
@@ -208,12 +204,42 @@ class CollectionInterpreter(ExpressionInterpreter):
 
         expected_type = self.get_array_assignment_type(target)
 
-        self.environment.validate_type(
+        # Multi-type arrays
+        if isinstance(
             expected_type,
-            value,
-            node.line,
-            node.column,
-        )
+            ArrayType,
+        ):
+            valid = False
+
+            for allowed_type in expected_type.element_types:
+                try:
+                    self.environment.validate_type(
+                        allowed_type,
+                        value,
+                        node.line,
+                        node.column,
+                    )
+
+                    valid = True
+                    break
+
+                except DatatypeMismatchError:
+                    pass
+
+            if not valid:
+                raise DatatypeMismatchError(
+                    "Datatype mismatch.",
+                    node.line,
+                    node.column,
+                )
+
+        else:
+            self.environment.validate_type(
+                expected_type,
+                value,
+                node.line,
+                node.column,
+            )
 
         try:
             array.value[index.value] = value
@@ -237,11 +263,29 @@ class CollectionInterpreter(ExpressionInterpreter):
 
         return current
 
-    def get_property_root(self, target):
+    def get_collection_root(
+        self,
+        target,
+    ):
         current = target
 
-        while hasattr(current, "target"):
-            current = current.target
+        while True:
+
+            if isinstance(
+                current,
+                PropertyAccess,
+            ):
+                current = current.target
+                continue
+
+            if isinstance(
+                current,
+                ArrayAccess,
+            ):
+                current = current.array
+                continue
+
+            break
 
         return current
 
@@ -256,10 +300,24 @@ class CollectionInterpreter(ExpressionInterpreter):
 
         return depth
 
-    def get_element_type(self, array_type, depth):
+    def get_element_type(
+        self,
+        array_type,
+        depth,
+    ):
         current = array_type
 
         for _ in range(depth):
+
+            if not isinstance(
+                current,
+                ArrayType,
+            ):
+                return current
+
+            if len(current.element_types) > 1:
+                return current
+
             current = current.element_types[0]
 
         return current
@@ -297,109 +355,17 @@ class CollectionInterpreter(ExpressionInterpreter):
         self,
         target,
     ):
-        root = self.get_property_root(target)
+        root = self.get_collection_root(target)
 
-        if isinstance(root, Identifier):
-            variable_info = self.environment.get_variable_info(
-                root.name,
-                target.line,
-                target.column,
-            )
-
-            variable_type = variable_info["type"]
-
-        elif isinstance(root, ArrayAccess):
-            array_root = self.get_array_root(root)
-
-            variable_info = self.environment.get_variable_info(
-                array_root.name,
-                target.line,
-                target.column,
-            )
-
-            depth = self.get_array_depth(root)
-
-            variable_type = self.get_element_type(
-                variable_info["type"],
-                depth,
-            )
-
-        else:
+        if not isinstance(
+            root,
+            Identifier,
+        ):
             raise DatatypeMismatchError(
                 "Invalid property access.",
                 target.line,
                 target.column,
             )
-
-        schema = self.environment.get_schema(
-            variable_type,
-            target.line,
-            target.column,
-        )
-
-        chain = []
-
-        current = target
-
-        while isinstance(current, PropertyAccess):
-            chain.append(current.property_name)
-            current = current.target
-
-        chain.reverse()
-
-        current_schema = schema
-
-        for property_name in chain:
-            field_lookup = {field.name: field for field in current_schema.fields}
-
-            field = field_lookup.get(property_name)
-
-            if field is None:
-                raise DatatypeMismatchError(
-                    f"Unknown property '{property_name}'.",
-                    target.line,
-                    target.column,
-                )
-
-            if property_name == chain[-1]:
-                return field
-
-            current_schema = self.environment.get_schema(
-                field.field_type,
-                target.line,
-                target.column,
-            )
-
-        raise DatatypeMismatchError(
-            "Invalid property access.",
-            target.line,
-            target.column,
-        )
-
-    def get_array_assignment_type(self, target):
-        parent = target.array
-
-        if isinstance(parent, PropertyAccess):
-            field = self.get_property_schema_field(parent)
-            return field.field_type.element_types[0]
-
-        if isinstance(parent, ArrayAccess):
-            root = self.get_array_root(parent)
-
-            variable_info = self.environment.get_variable_info(
-                root.name,
-                target.line,
-                target.column,
-            )
-
-            depth = self.get_array_depth(target)
-
-            return self.get_element_type(
-                variable_info["type"],
-                depth,
-            )
-
-        root = self.get_array_root(target)
 
         variable_info = self.environment.get_variable_info(
             root.name,
@@ -407,7 +373,167 @@ class CollectionInterpreter(ExpressionInterpreter):
             target.column,
         )
 
-        depth = self.get_array_depth(target)
+        variable_type = variable_info["type"]
+
+        chain = []
+
+        current = target
+
+        while True:
+
+            if isinstance(
+                current,
+                PropertyAccess,
+            ):
+                chain.append(
+                    (
+                        "property",
+                        current.property_name,
+                    )
+                )
+                current = current.target
+                continue
+
+            if isinstance(
+                current,
+                ArrayAccess,
+            ):
+                chain.append(
+                    (
+                        "array",
+                        None,
+                    )
+                )
+                current = current.array
+                continue
+
+            break
+
+        chain.reverse()
+
+        current_type = variable_type
+
+        for kind, value in chain:
+
+            if kind == "array":
+
+                current_type = self.get_element_type(
+                    current_type,
+                    1,
+                )
+
+                continue
+
+            schema = self.environment.get_schema(
+                current_type,
+                target.line,
+                target.column,
+            )
+
+            field_lookup = {field.name: field for field in schema.fields}
+
+            field = field_lookup.get(value)
+
+            if field is None:
+                raise DatatypeMismatchError(
+                    f"Unknown property '{value}'.",
+                    target.line,
+                    target.column,
+                )
+
+            current_type = field.field_type
+
+            if (kind, value) == chain[-1]:
+                return field
+
+        raise DatatypeMismatchError(
+            "Invalid property access.",
+            target.line,
+            target.column,
+        )
+
+    def get_array_assignment_type(
+        self,
+        target,
+    ):
+        parent = target.array
+
+        # Array inside schema field
+        if isinstance(
+            parent,
+            PropertyAccess,
+        ):
+            field = self.get_property_schema_field(
+                parent,
+            )
+
+            field_type = field.field_type
+
+            if not isinstance(
+                field_type,
+                ArrayType,
+            ):
+                return "U"
+
+            return field_type.element_types[0]
+
+        # Nested array
+        if isinstance(
+            parent,
+            ArrayAccess,
+        ):
+            root = self.get_collection_root(
+                parent,
+            )
+
+            if not isinstance(
+                root,
+                Identifier,
+            ):
+                raise DatatypeMismatchError(
+                    "Invalid array access.",
+                    target.line,
+                    target.column,
+                )
+
+            variable_info = self.environment.get_variable_info(
+                root.name,
+                target.line,
+                target.column,
+            )
+
+            depth = self.get_array_depth(
+                target,
+            )
+
+            return self.get_element_type(
+                variable_info["type"],
+                depth,
+            )
+
+        root = self.get_collection_root(
+            target,
+        )
+
+        if not isinstance(
+            root,
+            Identifier,
+        ):
+            raise DatatypeMismatchError(
+                "Invalid array access.",
+                target.line,
+                target.column,
+            )
+
+        variable_info = self.environment.get_variable_info(
+            root.name,
+            target.line,
+            target.column,
+        )
+
+        depth = self.get_array_depth(
+            target,
+        )
 
         return self.get_element_type(
             variable_info["type"],

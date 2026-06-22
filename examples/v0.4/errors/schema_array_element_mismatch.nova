@@ -1,0 +1,17 @@
+User: M = {
+    name: S
+}
+
+users: [User] = [
+    {
+        name = "Varun"
+    },
+
+    123
+]
+
+/*
+Expected Error:
+
+Invalid datatype inside array.
+*/

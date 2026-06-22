@@ -1,0 +1,14 @@
+User: M = {
+    name: S
+}
+
+user: User = {
+    name = "Varun",
+    city = "Mumbai"
+}
+
+/*
+Expected Error:
+
+Unknown property 'city'.
+*/

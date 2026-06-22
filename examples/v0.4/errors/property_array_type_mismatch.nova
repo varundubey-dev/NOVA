@@ -1,0 +1,17 @@
+User: M = {
+    skills: [S]
+}
+
+user: User = {
+    skills = [
+        "Python"
+    ]
+}
+
+user.skills[0] = 123
+
+/*
+Expected Error:
+
+Datatype mismatch.
+*/

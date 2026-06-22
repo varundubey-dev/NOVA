@@ -1,0 +1,366 @@
+// NOVA v0.4 full demo
+
+/*
+    Schemas
+    Nested Schemas
+    Arrays
+    Arrays Of Schemas
+    Nested Arrays
+    Optional Properties
+    Constants
+    Property Access
+    Property Mutation
+    Array Mutation
+    Deep Access
+*/
+
+Address: M = {
+    city: S,
+    country: S
+}
+
+Company: M = {
+    name: S,
+    location: Address
+}
+
+User: M = {
+    name: S,
+    age: N,
+    isCoder: B,
+    nickname?: S,
+    skills: [S],
+    address: Address,
+    company?: Company
+}
+
+
+// Basic User
+
+user: User = {
+    name = "Varun",
+    age = 19,
+    isCoder = true,
+
+    skills = [
+        "Python",
+        "TypeScript",
+        "NOVA"
+    ],
+
+    address = {
+        city = "Mumbai",
+        country = "India"
+    }
+}
+
+
+// Property Access
+
+print(user.name)
+print(user.age)
+print(user.isCoder)
+
+print(user.address.city)
+print(user.address.country)
+
+print(user.skills[0])
+print(user.skills[1])
+print(user.skills[2])
+
+
+// Property Mutation
+
+user.name = "Nova"
+user.age = 20
+user.address.city = "Pune"
+
+print(user.name)
+print(user.age)
+print(user.address.city)
+
+
+// Array Mutation
+
+user.skills[0] = "Rust"
+user.skills[1] = "Go"
+user.skills[2] = "C++"
+
+print(user.skills[0])
+print(user.skills[1])
+print(user.skills[2])
+
+
+// Optional Property
+
+optionalUser: User = {
+    name = "Guest",
+    age = 30,
+    isCoder = false,
+
+    nickname = "G",
+
+    skills = [
+        "HTML"
+    ],
+
+    address = {
+        city = "London",
+        country = "UK"
+    }
+}
+
+print(optionalUser.nickname)
+
+
+// Nested Optional Schema
+
+employee: User = {
+    name = "Alice",
+    age = 22,
+    isCoder = true,
+
+    skills = [
+        "Python",
+        "Docker"
+    ],
+
+    address = {
+        city = "Delhi",
+        country = "India"
+    },
+
+    company = {
+        name = "Nova Labs",
+
+        location = {
+            city = "Bangalore",
+            country = "India"
+        }
+    }
+}
+
+print(employee.company.name)
+print(employee.company.location.city)
+
+
+// Arrays Of Schemas
+
+users: [User] = [
+    {
+        name = "Bob",
+        age = 25,
+        isCoder = true,
+
+        skills = [
+            "Java",
+            "Spring"
+        ],
+
+        address = {
+            city = "Tokyo",
+            country = "Japan"
+        }
+    },
+
+    {
+        name = "Charlie",
+        age = 28,
+        isCoder = false,
+
+        skills = [
+            "Design"
+        ],
+
+        address = {
+            city = "Paris",
+            country = "France"
+        }
+    }
+]
+
+print(users[0].name)
+print(users[1].name)
+
+print(users[0].address.country)
+print(users[1].address.country)
+
+print(users[0].skills[0])
+print(users[1].skills[0])
+
+
+// Mutation Through Arrays Of Schemas
+
+users[0].name = "UpdatedBob"
+users[0].address.city = "Osaka"
+users[0].skills[1] = "Kotlin"
+
+print(users[0].name)
+print(users[0].address.city)
+print(users[0].skills[1])
+
+
+// Nested Arrays Of Schemas
+
+groups: [[User]] = [
+    [
+        {
+            name = "TeamA",
+            age = 1,
+            isCoder = true,
+
+            skills = [
+                "Leadership"
+            ],
+
+            address = {
+                city = "Mumbai",
+                country = "India"
+            }
+        }
+    ],
+
+    [
+        {
+            name = "TeamB",
+            age = 2,
+            isCoder = true,
+
+            skills = [
+                "Management"
+            ],
+
+            address = {
+                city = "Pune",
+                country = "India"
+            }
+        }
+    ]
+]
+
+print(groups[0][0].name)
+print(groups[1][0].name)
+
+print(groups[0][0].address.city)
+print(groups[1][0].address.city)
+
+
+// Deep Nested Mutations
+
+groups[0][0].name = "Alpha"
+groups[0][0].address.city = "Nashik"
+groups[0][0].skills[0] = "Strategy"
+
+print(groups[0][0].name)
+print(groups[0][0].address.city)
+print(groups[0][0].skills[0])
+
+
+// Empty Arrays
+
+emptySkills: [S] = []
+
+print(emptySkills)
+
+
+// Multi-dimensional Arrays
+
+numbers: [[N]] = [
+    [1, 2, 3],
+    [4, 5, 6]
+]
+
+print(numbers[0][0])
+print(numbers[1][2])
+
+numbers[0][1] = 999
+
+print(numbers[0][1])
+
+
+// Constants
+
+admin:: User = {
+    name = "Root",
+    age = 999,
+    isCoder = true,
+
+    skills = [
+        "Everything"
+    ],
+
+    address = {
+        city = "Server",
+        country = "Internet"
+    }
+}
+
+print(admin.name)
+print(admin.address.country)
+print(admin.skills[0])
+
+
+// Any Type
+
+anything: U = "hello"
+print(anything)
+
+anything = 123
+print(anything)
+
+anything = true
+print(anything)
+
+anything = null
+print(anything)
+
+anything = [
+    1,
+    2,
+    3
+]
+
+print(anything)
+
+
+// Boolean Logic
+
+flag: B = true
+
+print(flag && true)
+print(flag || false)
+print(!flag)
+
+
+// Arithmetic
+
+a: N = 10
+b: N = 3
+
+print(a + b)
+print(a - b)
+print(a * b)
+print(a / b)
+print(a % b)
+
+
+// Comparison
+
+print(a > b)
+print(a < b)
+print(a >= b)
+print(a <= b)
+
+print(a == b)
+print(a != b)
+
+
+// Null
+
+nothing: U = null
+
+print(nothing == null)
+print(nothing != null)
+
+
+// End

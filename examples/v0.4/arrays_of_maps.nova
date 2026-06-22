@@ -1,0 +1,26 @@
+User: M = {
+    name: S,
+    age: N
+}
+
+users: [User] = [
+    {
+        name = "Alice",
+        age = 22
+    },
+
+    {
+        name = "Bob",
+        age = 25
+    }
+]
+
+print(users[0].name)
+print(users[1].name)
+
+/*
+Expected Output:
+
+Alice
+Bob
+*/

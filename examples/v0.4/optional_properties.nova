@@ -1,0 +1,23 @@
+User: M = {
+    name: S,
+    nickname?: S
+}
+
+user: User = {
+    name = "Varun"
+}
+
+guest: User = {
+    name = "Nova",
+    nickname = "N"
+}
+
+print(user.name)
+print(guest.nickname)
+
+/*
+Expected Output:
+
+Varun
+N
+*/
