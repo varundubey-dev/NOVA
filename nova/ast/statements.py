@@ -151,3 +151,43 @@ class PrintStatement(Statement):
 
     def __repr__(self):
         return f"PrintStatement({self.expression})"
+
+
+class BlockStatement(Statement):
+    def __init__(
+        self,
+        statements,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.statements = statements
+
+    def __repr__(self):
+        return f"BlockStatement({self.statements})"
+
+
+class IfStatement(Statement):
+    def __init__(
+        self,
+        condition,
+        then_branch,
+        else_branch=None,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
+
+    def __repr__(self):
+        return (
+            f"IfStatement("
+            f"condition={self.condition}, "
+            f"then_branch={self.then_branch}, "
+            f"else_branch={self.else_branch}"
+            f")"
+        )

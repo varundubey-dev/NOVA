@@ -13,6 +13,8 @@ from .statements import (
     SchemaDeclaration,
     PropertyAssignment,
     PrintStatement,
+    BlockStatement,
+    IfStatement,
 )
 
 from .expressions import (
@@ -21,6 +23,7 @@ from .expressions import (
     PropertyAccess,
     BinaryExpression,
     UnaryExpression,
+    TernaryExpression,
 )
 
 from .literals import (
@@ -52,12 +55,15 @@ __all__ = [
     "SchemaDeclaration",
     "PropertyAssignment",
     "PrintStatement",
+    "BlockStatement",
+    "IfStatement",
     # Expressions
     "Identifier",
     "ArrayAccess",
     "PropertyAccess",
     "BinaryExpression",
     "UnaryExpression",
+    "TernaryExpression",
     # Literals
     "NumberLiteral",
     "StringLiteral",

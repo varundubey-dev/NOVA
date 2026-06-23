@@ -100,3 +100,28 @@ class UnaryExpression(Expression):
             f"operand={self.operand}"
             f")"
         )
+
+
+class TernaryExpression(Expression):
+    def __init__(
+        self,
+        condition,
+        true_expression,
+        false_expression,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.condition = condition
+        self.true_expression = true_expression
+        self.false_expression = false_expression
+
+    def __repr__(self):
+        return (
+            f"TernaryExpression("
+            f"condition={self.condition}, "
+            f"true_expression={self.true_expression}, "
+            f"false_expression={self.false_expression}"
+            f")"
+        )
