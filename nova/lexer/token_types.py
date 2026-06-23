@@ -13,6 +13,8 @@ class TokenType(Enum):
 
     # Keywords
     PRINT = auto()
+    IF = auto()
+    ELSE = auto()
 
     # Datatypes
     TYPE = auto()

@@ -10,6 +10,8 @@ from nova.errors import (
 
 KEYWORDS = {
     "print": TokenType.PRINT,
+    "if": TokenType.IF,
+    "else": TokenType.ELSE,
     "true": TokenType.BOOLEAN,
     "false": TokenType.BOOLEAN,
     "null": TokenType.NULL,
@@ -287,28 +289,27 @@ class Lexer:
             if self.current_char == "[":
                 self.advance()
                 return Token(TokenType.LBRACKET, "[", line, column)
-            
+
             if self.current_char == "]":
                 self.advance()
                 return Token(TokenType.RBRACKET, "]", line, column)
-            
+
             if self.current_char == "{":
                 self.advance()
                 return Token(TokenType.LBRACE, "{", line, column)
-            
+
             if self.current_char == "}":
                 self.advance()
                 return Token(TokenType.RBRACE, "}", line, column)
-            
+
             if self.current_char == ".":
                 self.advance()
                 return Token(TokenType.DOT, ".", line, column)
 
-
             if self.current_char == ",":
                 self.advance()
                 return Token(TokenType.COMMA, ",", line, column)
-            
+
             if self.current_char == "?":
                 self.advance()
                 return Token(TokenType.QUESTION, "?", line, column)
