@@ -1,0 +1,10 @@
+if true {
+
+    message: S = "Hello"
+
+}
+
+print(message)
+
+// Expected Error:
+// Variable 'message' is not declared.

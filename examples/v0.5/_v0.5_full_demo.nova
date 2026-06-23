@@ -1,0 +1,68 @@
+name: S = "Global"
+
+age: N = 20
+citizen: B = true
+admin: B = false
+
+status: S = (
+    age >= 18
+        ? "Adult"
+        : "Minor"
+)
+
+print(status)
+
+if age >= 18 {
+
+    print("Adult")
+
+    if citizen {
+
+        print("Citizen")
+
+        localName: S = "Block Scope"
+
+        print(localName)
+
+        if admin {
+
+            print("Admin")
+
+        }
+        else {
+
+            print("User")
+
+        }
+
+    }
+
+}
+
+shadow: S = "Global"
+
+if true {
+
+    shadow: S = "Local"
+
+    print(shadow)
+
+}
+
+print(shadow)
+
+print(
+    citizen
+        ? "Verified"
+        : "Guest"
+)
+
+// Expected Output:
+// Adult
+// Adult
+// Citizen
+// Block Scope
+// User
+// Local
+// Global
+// Verified

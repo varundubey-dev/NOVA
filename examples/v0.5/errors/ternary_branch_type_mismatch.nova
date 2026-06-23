@@ -1,0 +1,10 @@
+value: N = (
+    false
+        ? 10
+        : "Hello"
+)
+
+print(value)
+
+// Expected Error:
+// Datatype mismatch.

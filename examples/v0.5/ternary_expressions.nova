@@ -1,0 +1,28 @@
+age: N = 20
+
+status: S = (
+    age >= 18
+        ? "Adult"
+        : "Minor"
+)
+
+print(status)
+
+largest: N = (
+    10 > 5
+        ? 10
+        : 5
+)
+
+isTest: B = true
+
+print(largest)
+
+testMode: B = isTest ? true : false
+
+print(testMode)
+
+// Expected Output:
+// Adult
+// 10
+// true

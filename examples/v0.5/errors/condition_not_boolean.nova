@@ -1,0 +1,8 @@
+if 10 {
+
+    print("Invalid")
+
+}
+
+// Expected Error:
+// Condition must evaluate to a Boolean value.

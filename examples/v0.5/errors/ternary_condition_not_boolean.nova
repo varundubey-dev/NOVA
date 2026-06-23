@@ -1,0 +1,8 @@
+value: S = (
+    123
+        ? "A"
+        : "B"
+)
+
+// Expected Error:
+// Condition must evaluate to a Boolean value.

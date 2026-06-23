@@ -1,0 +1,15 @@
+isAdmin: B = false
+isModerator: B = true
+isBlocked: B = false
+
+if isAdmin || isModerator {
+    print("Access Granted")
+}
+
+if !isBlocked {
+    print("Allowed")
+}
+
+if isModerator && !isBlocked {
+    print("Moderator")
+}

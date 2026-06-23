@@ -1,0 +1,16 @@
+message: S = "Global"
+
+if true {
+
+    local: S = "Inside Block"
+
+    print(local)
+    print(message)
+
+}
+
+print(message)
+
+// Expected Output:
+// Inside Block
+// Global

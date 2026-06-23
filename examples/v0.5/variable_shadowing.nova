@@ -1,0 +1,15 @@
+name: S = "Global"
+
+if true {
+
+    name: S = "Local"
+
+    print(name)
+
+}
+
+print(name)
+
+// Expected Output:
+// Local
+// Global

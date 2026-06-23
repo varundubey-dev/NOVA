@@ -1,0 +1,19 @@
+age: N = 20
+citizen: B = true
+blocked: B = false
+
+if age >= 18 && citizen {
+
+    print("Allowed")
+
+}
+
+if !blocked {
+
+    print("Visible")
+
+}
+
+// Expected Output:
+// Allowed
+// Visible
