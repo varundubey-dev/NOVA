@@ -16,6 +16,9 @@ from nova.ast import (
     ArrayAssignment,
     BinaryExpression,
     UnaryExpression,
+    TernaryExpression,
+    IfStatement,
+    BlockStatement,
     SchemaDeclaration,
     MapLiteral,
     PropertyAccess,
@@ -53,6 +56,12 @@ class InterpreterBase:
         if isinstance(node, PrintStatement):
             return self.visit_print_statement(node)
 
+        if isinstance(node, BlockStatement):
+            return self.visit_block_statement(node)
+
+        if isinstance(node, IfStatement):
+            return self.visit_if_statement(node)
+
         if isinstance(node, NumberLiteral):
             return self.visit_number_literal(node)
 
@@ -89,6 +98,9 @@ class InterpreterBase:
         if isinstance(node, BinaryExpression):
             return self.visit_binary_expression(node)
 
+        if isinstance(node, TernaryExpression):
+            return self.visit_ternary_expression(node)
+
         raise NotImplementedError(f"Unknown node type: {type(node).__name__}")
 
     # -------------------------
@@ -114,6 +126,12 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_print_statement(self, node):
+        raise NotImplementedError
+
+    def visit_block_statement(self, node):
+        raise NotImplementedError
+
+    def visit_if_statement(self, node):
         raise NotImplementedError
 
     # -------------------------
@@ -149,6 +167,9 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_property_access(self, node):
+        raise NotImplementedError
+
+    def visit_ternary_expression(self, node):
         raise NotImplementedError
 
     # -------------------------

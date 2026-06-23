@@ -1,4 +1,6 @@
 from nova.interpreter.base import InterpreterBase
+from nova.interpreter.runtime_values import BooleanValue
+from nova.errors import ConditionTypeError
 
 
 class StatementInterpreter(InterpreterBase):
@@ -70,3 +72,40 @@ class StatementInterpreter(InterpreterBase):
         self.output.append(self.format_value(value))
 
         return value
+    
+    def visit_block_statement(self, node):
+        previous_environment = self.environment
+
+        self.environment = self.environment.create_child()
+
+        try:
+            result = None
+
+            for statement in node.statements:
+                result = self.visit(statement)
+
+            return result
+
+        finally:
+            self.environment = previous_environment
+            
+    def visit_if_statement(self, node):
+        condition = self.visit(node.condition)
+
+        if not isinstance(
+            condition,
+            BooleanValue,
+        ):
+            raise ConditionTypeError(
+                "Condition must evaluate to a Boolean value.",
+                node.line,
+                node.column,
+            )
+
+        if condition.value:
+            return self.visit(node.then_branch)
+
+        if node.else_branch is not None:
+            return self.visit(node.else_branch)
+
+        return None

@@ -13,6 +13,7 @@ from nova.errors import (
     InvalidOperandError,
     UnknownOperatorError,
     NullOperationError,
+    ConditionTypeError,
 )
 
 
@@ -40,6 +41,26 @@ class ExpressionInterpreter(StatementInterpreter):
             node.line,
             node.column,
         )
+        
+    # -------------------------
+    # Condition Validation
+    # -------------------------
+
+    def require_boolean_condition(
+        self,
+        value,
+        line,
+        column,
+    ):
+        if not isinstance(
+            value,
+            BooleanValue,
+        ):
+            raise ConditionTypeError(
+                "Condition must evaluate to a Boolean value.",
+                line,
+                column,
+            )
 
     # -------------------------
     # Unary Expressions
@@ -255,6 +276,24 @@ class ExpressionInterpreter(StatementInterpreter):
             node.line,
             node.column,
         )
+        
+    # -------------------------
+    # Ternary Expressions
+    # -------------------------
+
+    def visit_ternary_expression(self, node):
+        condition = self.visit(node.condition)
+
+        self.require_boolean_condition(
+            condition,
+            node.line,
+            node.column,
+        )
+
+        if condition.value:
+            return self.visit(node.true_expression)
+
+        return self.visit(node.false_expression)
 
     # -------------------------
     # Output Formatting

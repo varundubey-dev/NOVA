@@ -22,7 +22,8 @@ from nova.errors.runtime_errors import (
     DuplicateDeclarationError,
     ConstantReassignmentError,
     UnknownOperatorError,
-    NullOperationError
+    NullOperationError,
+    ConditionTypeError,
 )
 
 from nova.errors.type_errors import (
@@ -52,6 +53,7 @@ __all__ = [
     "ConstantReassignmentError",
     "UnknownOperatorError",
     "NullOperationError",
+    "ConditionTypeError",
     "TypeError",
     "DatatypeMismatchError",
     "InvalidOperandError",

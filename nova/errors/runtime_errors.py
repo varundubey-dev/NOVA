@@ -27,3 +27,7 @@ class UnknownOperatorError(RuntimeError):
 
 class NullOperationError(RuntimeError):
     pass
+
+
+class ConditionTypeError(RuntimeError):
+    pass
