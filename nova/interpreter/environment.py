@@ -19,9 +19,33 @@ from nova.errors import (
 
 
 class Environment:
-    def __init__(self):
+    def __init__(self, parent=None):
+        self.parent = parent
+
         self.variables = {}
         self.schemas = {}
+
+    def resolve_variable(
+        self,
+        name,
+        line=None,
+        column=None,
+    ):
+        if name in self.variables:
+            return self
+
+        if self.parent is not None:
+            return self.parent.resolve_variable(
+                name,
+                line,
+                column,
+            )
+
+        raise UndeclaredVariableError(
+            f"Variable '{name}' is not declared.",
+            line,
+            column,
+        )
 
     def validate_type(
         self,
@@ -143,16 +167,21 @@ class Environment:
         line=None,
         column=None,
     ):
-        schema = self.schemas.get(name)
+        if name in self.schemas:
+            return self.schemas[name]
 
-        if schema is None:
-            raise DatatypeMismatchError(
-                f"Unknown schema '{name}'.",
+        if self.parent is not None:
+            return self.parent.get_schema(
+                name,
                 line,
                 column,
             )
 
-        return schema
+        raise DatatypeMismatchError(
+            f"Unknown schema '{name}'.",
+            line,
+            column,
+        )
 
     def validate_schema_instance(
         self,
@@ -283,14 +312,13 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name not in self.variables:
-            raise UndeclaredVariableError(
-                f"Variable '{name}' is not declared.",
-                line,
-                column,
-            )
+        environment = self.resolve_variable(
+            name,
+            line,
+            column,
+        )
 
-        variable = self.variables[name]
+        variable = environment.variables[name]
 
         if variable["constant"] and variable["initialized"]:
             raise ConstantReassignmentError(
@@ -299,7 +327,7 @@ class Environment:
                 column,
             )
 
-        self.validate_type(
+        environment.validate_type(
             variable["type"],
             value,
             line,
@@ -315,14 +343,13 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name not in self.variables:
-            raise UndeclaredVariableError(
-                f"Variable '{name}' is not declared.",
-                line,
-                column,
-            )
+        environment = self.resolve_variable(
+            name,
+            line,
+            column,
+        )
 
-        return self.variables[name]
+        return environment.variables[name]
 
     def get_variable(
         self,
@@ -330,14 +357,13 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name not in self.variables:
-            raise UndeclaredVariableError(
-                f"Variable '{name}' is not declared.",
-                line,
-                column,
-            )
+        environment = self.resolve_variable(
+            name,
+            line,
+            column,
+        )
 
-        variable = self.variables[name]
+        variable = environment.variables[name]
 
         if not variable["initialized"]:
             raise UninitializedVariableError(
@@ -347,3 +373,6 @@ class Environment:
             )
 
         return variable["value"]
+
+    def create_child(self):
+        return Environment(parent=self)
