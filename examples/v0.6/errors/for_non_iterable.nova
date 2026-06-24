@@ -1,0 +1,7 @@
+value: N = 10
+
+for item in value {
+
+}
+
+// Expected: Value is not iterable.

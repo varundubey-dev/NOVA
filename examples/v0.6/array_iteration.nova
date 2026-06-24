@@ -1,0 +1,14 @@
+names: [S] = [
+    "Varun",
+    "Nova",
+    "Alex"
+]
+
+for name in names {
+    print(name)
+}
+
+// Expected Output:
+// Varun
+// Nova
+// Alex

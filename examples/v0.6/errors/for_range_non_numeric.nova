@@ -1,0 +1,5 @@
+for i in "A".."Z" {
+
+}
+
+//Expected: Range bounds must be numeric.

@@ -1,0 +1,7 @@
+value: N = 10
+
+while value {
+
+}
+
+// Expected: Condition must evaluate to a Boolean value.

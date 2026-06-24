@@ -1,0 +1,26 @@
+User: M = {
+    name: S,
+    age: N
+}
+
+users: [User] = [
+    {
+        name = "Varun",
+        age = 19
+    },
+
+    {
+        name = "Nova",
+        age = 21
+    }
+]
+
+for user in users {
+
+    print(user.name, user.age)
+
+}
+
+// Expected Output:
+// Varun 19
+// Nova 21

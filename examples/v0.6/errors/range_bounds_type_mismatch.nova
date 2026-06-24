@@ -1,0 +1,8 @@
+start: S = "0"
+end: N = 10
+
+for i in start..end {
+
+}
+
+// Expected: Range bounds must be numeric.

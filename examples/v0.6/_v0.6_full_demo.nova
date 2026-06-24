@@ -1,0 +1,559 @@
+// ======================================================
+// NOVA v0.6 FULL DEMO
+// ======================================================
+
+Address: M = {
+    city: S,
+    country: S
+}
+
+User: M = {
+    name: S,
+    age: N,
+    active: B,
+    skills: [S],
+    address: Address
+}
+
+// ======================================================
+// BASIC TYPES
+// ======================================================
+
+name: S = "Varun"
+age: N = 19
+isAdult: B = age >= 18
+
+print(name)
+print(age)
+print(isAdult)
+
+
+// ======================================================
+// ARRAYS
+// ======================================================
+
+numbers: [N] = [
+    1,
+    2,
+    3,
+    4,
+    5
+]
+
+matrix: [[N]] = [
+    [1,2,3],
+    [4,5,6],
+    [7,8,9]
+]
+
+print(numbers)
+print(matrix)
+
+print(numbers[0])
+print(matrix[2][2])
+
+numbers[0] = 100
+matrix[1][1] = 500
+
+print(numbers[0])
+print(matrix[1][1])
+
+
+// ======================================================
+// MAPS
+// ======================================================
+
+user: User = {
+    name = "Varun",
+    age = 19,
+    active = true,
+
+    skills = [
+        "Python",
+        "TypeScript",
+        "Rust"
+    ],
+
+    address = {
+        city = "Mumbai",
+        country = "India"
+    }
+}
+
+print(user.name)
+print(user.age)
+
+print(user.address.city)
+print(user.skills[0])
+
+user.name = "Nova"
+user.address.city = "Pune"
+user.skills[2] = "Go"
+
+print(user.name)
+print(user.address.city)
+print(user.skills[2])
+
+
+// ======================================================
+// ARRAYS OF MAPS
+// ======================================================
+
+users: [User] = [
+
+    {
+        name = "Alice",
+        age = 20,
+        active = true,
+
+        skills = [
+            "Python",
+            "Docker"
+        ],
+
+        address = {
+            city = "Tokyo",
+            country = "Japan"
+        }
+    },
+
+    {
+        name = "Bob",
+        age = 30,
+        active = false,
+
+        skills = [
+            "Java",
+            "Spring"
+        ],
+
+        address = {
+            city = "Paris",
+            country = "France"
+        }
+    }
+
+]
+
+print(users[0].name)
+print(users[1].address.country)
+
+
+// ======================================================
+// TERNARY
+// ======================================================
+
+status: S = (
+    user.age >= 18
+        ? "Adult"
+        : "Minor"
+)
+
+print(status)
+
+print(
+    user.active
+        ? "ACTIVE"
+        : "INACTIVE"
+)
+
+
+// ======================================================
+// IF / ELSE
+// ======================================================
+
+if user.active {
+
+    print("USER ACTIVE")
+
+}
+else {
+
+    print("USER INACTIVE")
+
+}
+
+if user.age >= 18 {
+
+    if user.address.country == "India" {
+
+        print("INDIAN ADULT")
+
+    }
+    else {
+
+        print("FOREIGN ADULT")
+
+    }
+
+}
+else {
+
+    print("MINOR")
+
+}
+
+
+// ======================================================
+// WHILE LOOP
+// ======================================================
+
+counter: N = 0
+
+while counter < 5 {
+
+    print(
+        "WHILE",
+        counter
+    )
+
+    counter = counter + 1
+
+}
+
+
+// ======================================================
+// RANGE LOOP EXCLUSIVE
+// ======================================================
+
+for i in 0..5 {
+
+    print(
+        "EXCLUSIVE",
+        i
+    )
+
+}
+
+
+// ======================================================
+// RANGE LOOP INCLUSIVE
+// ======================================================
+
+for i in 0...5 {
+
+    print(
+        "INCLUSIVE",
+        i
+    )
+
+}
+
+
+// ======================================================
+// DESCENDING RANGE
+// ======================================================
+
+for i in 5..0 {
+
+    print(
+        "DESC",
+        i
+    )
+
+}
+
+
+// ======================================================
+// DESCENDING INCLUSIVE RANGE
+// ======================================================
+
+for i in 5...0 {
+
+    print(
+        "DESC_INC",
+        i
+    )
+
+}
+
+
+// ======================================================
+// ARRAY ITERATION
+// ======================================================
+
+for value in numbers {
+
+    print(
+        "ARRAY",
+        value
+    )
+
+}
+
+
+// ======================================================
+// NESTED ARRAY ITERATION
+// ======================================================
+
+for row in matrix {
+
+    for value in row {
+
+        print(
+            "MATRIX",
+            value
+        )
+
+    }
+
+}
+
+
+// ======================================================
+// ARRAY OF MAPS ITERATION
+// ======================================================
+
+for person in users {
+
+    print(
+        person.name,
+        person.age
+    )
+
+    for skill in person.skills {
+
+        print(
+            person.name,
+            skill
+        )
+
+    }
+
+}
+
+
+// ======================================================
+// DEEP NESTING 
+// ======================================================
+
+for person in users {
+
+    if person.active {
+
+        print(
+            person.name,
+            "ACTIVE"
+        )
+
+        for skill in person.skills {
+
+            if skill == "Python" {
+
+                print(
+                    person.name,
+                    "KNOWS PYTHON"
+                )
+
+            }
+            else {
+
+                print(
+                    person.name,
+                    skill
+                )
+
+            }
+
+        }
+
+    }
+    else {
+
+        print(
+            person.name,
+            "INACTIVE"
+        )
+
+    }
+
+}
+
+
+// ======================================================
+// SHADOWING 
+// ======================================================
+
+value: N = 999
+
+for value in 0..3 {
+
+    print(
+        "SHADOW",
+        value
+    )
+
+}
+
+print(value)
+
+
+// ======================================================
+// LOOP SCOPE 
+// ======================================================
+
+for i in 0..1 {
+
+    temp: S = "inside"
+
+    print(temp)
+
+}
+
+
+// ======================================================
+// MULTI PRINT 
+// ======================================================
+
+print(
+    "MULTI",
+    123,
+    true,
+    null
+)
+
+
+// ======================================================
+// COMPLEX EXPRESSION 
+// ======================================================
+
+complex: N = (
+    (
+        10 +
+        20
+    ) * 2
+)
+
+print(complex)
+
+
+// ======================================================
+// ANY TYPE 
+// ======================================================
+
+anything: U = "hello"
+print(anything)
+
+anything = 123
+print(anything)
+
+anything = true
+print(anything)
+
+anything = null
+print(anything)
+
+anything = [
+    1,
+    2,
+    3
+]
+
+print(anything)
+
+
+// ======================================================
+// CONSTANT 
+// ======================================================
+
+PI:: N = 3.14159
+
+print(PI)
+
+
+// ======================================================
+// EXPECTED OUTPUT 
+// ======================================================
+
+/*
+Varun          
+19                                                          
+true
+[1, 2, 3, 4, 5]
+[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+1
+9
+100
+500
+Varun
+19
+Mumbai
+Python
+Nova
+Pune
+Go
+Alice
+France
+Adult
+ACTIVE
+USER ACTIVE
+INDIAN ADULT
+WHILE 0
+WHILE 1
+WHILE 2
+WHILE 3
+WHILE 4
+EXCLUSIVE 0
+EXCLUSIVE 1
+EXCLUSIVE 2
+EXCLUSIVE 3
+EXCLUSIVE 4
+INCLUSIVE 0
+INCLUSIVE 1
+INCLUSIVE 2
+INCLUSIVE 3
+INCLUSIVE 4
+INCLUSIVE 5
+DESC 5
+DESC 4
+DESC 3
+DESC 2
+DESC 1
+DESC_INC 5
+DESC_INC 4
+DESC_INC 3
+DESC_INC 2
+DESC_INC 1
+DESC_INC 0
+ARRAY 100
+ARRAY 2
+ARRAY 3
+ARRAY 4
+ARRAY 5
+MATRIX 1
+MATRIX 2
+MATRIX 3
+MATRIX 4
+MATRIX 500
+MATRIX 6
+MATRIX 7
+MATRIX 8
+MATRIX 9
+Alice 20
+Alice Python
+Alice Docker
+Bob 30
+Bob Java
+Bob Spring
+Alice ACTIVE
+Alice KNOWS PYTHON
+Alice Docker
+Bob INACTIVE
+SHADOW 0
+SHADOW 1
+SHADOW 2
+999
+inside
+MULTI 123 true null
+60
+hello
+123
+true
+null
+[1, 2, 3]
+3.14159
+*/
+
+// ======================================================
+// END
+// ======================================================
