@@ -12,6 +12,9 @@ KEYWORDS = {
     "print": TokenType.PRINT,
     "if": TokenType.IF,
     "else": TokenType.ELSE,
+    "while": TokenType.WHILE,
+    "for": TokenType.FOR,
+    "in": TokenType.IN,
     "true": TokenType.BOOLEAN,
     "false": TokenType.BOOLEAN,
     "null": TokenType.NULL,
@@ -47,6 +50,14 @@ class Lexer:
 
     def peek(self):
         next_position = self.position + 1
+
+        if next_position >= len(self.source):
+            return None
+
+        return self.source[next_position]
+
+    def peek_two(self):
+        next_position = self.position + 2
 
         if next_position >= len(self.source):
             return None
@@ -96,27 +107,36 @@ class Lexer:
             value += self.current_char
             self.advance()
 
-        if self.current_char == ".":
-            value += self.current_char
-            self.advance()
+        next_char = self.peek()
 
-            if self.current_char is None or not self.current_char.isdigit():
+        if self.current_char == ".":
+
+            if next_char is not None and next_char.isdigit():
+                value += self.current_char
+                self.advance()
+
+                while self.current_char is not None and self.current_char.isdigit():
+                    value += self.current_char
+                    self.advance()
+
+            elif next_char != ".":
                 raise InvalidFloatLiteralError(
                     "Invalid float literal.",
                     self.line,
                     self.column,
                 )
 
-            while self.current_char is not None and self.current_char.isdigit():
-                value += self.current_char
-                self.advance()
-
         if "." in value:
             value = float(value)
         else:
             value = int(value)
 
-        return Token(TokenType.NUMBER, value, start_line, start_column)
+        return Token(
+            TokenType.NUMBER,
+            value,
+            start_line,
+            start_column,
+        )
 
     def read_string(self):
         start_line = self.line
@@ -233,6 +253,33 @@ class Lexer:
                 self.advance()
                 self.advance()
                 return Token(TokenType.DOUBLE_COLON, "::", line, column)
+
+            if (
+                self.current_char == "."
+                and self.peek() == "."
+                and self.peek_two() == "."
+            ):
+                self.advance()
+                self.advance()
+                self.advance()
+
+                return Token(
+                    TokenType.RANGE_INCLUSIVE,
+                    "...",
+                    line,
+                    column,
+                )
+
+            if self.current_char == "." and self.peek() == ".":
+                self.advance()
+                self.advance()
+
+                return Token(
+                    TokenType.RANGE_EXCLUSIVE,
+                    "..",
+                    line,
+                    column,
+                )
 
             # =====================
             # One-character tokens

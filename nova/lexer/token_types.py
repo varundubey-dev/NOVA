@@ -16,6 +16,10 @@ class TokenType(Enum):
     IF = auto()
     ELSE = auto()
 
+    WHILE = auto()
+    FOR = auto()
+    IN = auto()
+
     # Datatypes
     TYPE = auto()
 
@@ -38,6 +42,9 @@ class TokenType(Enum):
     AND = auto()
     OR = auto()
     NOT = auto()
+    
+    RANGE_EXCLUSIVE = auto()
+    RANGE_INCLUSIVE = auto()
 
     # Symbols
     COLON = auto()
