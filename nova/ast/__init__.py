@@ -15,6 +15,9 @@ from .statements import (
     PrintStatement,
     BlockStatement,
     IfStatement,
+    WhileStatement,
+    ForRangeStatement,
+    ForEachStatement,
 )
 
 from .expressions import (
@@ -57,6 +60,9 @@ __all__ = [
     "PrintStatement",
     "BlockStatement",
     "IfStatement",
+    "WhileStatement",
+    "ForRangeStatement",
+    "ForEachStatement",
     # Expressions
     "Identifier",
     "ArrayAccess",

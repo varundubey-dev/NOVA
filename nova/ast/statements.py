@@ -191,3 +191,78 @@ class IfStatement(Statement):
             f"else_branch={self.else_branch}"
             f")"
         )
+
+class WhileStatement(Statement):
+    def __init__(
+        self,
+        condition,
+        body,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.condition = condition
+        self.body = body
+
+    def __repr__(self):
+        return (
+            f"WhileStatement("
+            f"condition={self.condition}, "
+            f"body={self.body}"
+            f")"
+        )
+
+class ForRangeStatement(Statement):
+    def __init__(
+        self,
+        variable_name,
+        start,
+        end,
+        inclusive,
+        body,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.variable_name = variable_name
+        self.start = start
+        self.end = end
+        self.inclusive = inclusive
+        self.body = body
+
+    def __repr__(self):
+        return (
+            f"ForRangeStatement("
+            f"variable_name={self.variable_name!r}, "
+            f"start={self.start}, "
+            f"end={self.end}, "
+            f"inclusive={self.inclusive}, "
+            f"body={self.body}"
+            f")"
+        )
+
+class ForEachStatement(Statement):
+    def __init__(
+        self,
+        variable_name,
+        iterable,
+        body,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.variable_name = variable_name
+        self.iterable = iterable
+        self.body = body
+
+    def __repr__(self):
+        return (
+            f"ForEachStatement("
+            f"variable_name={self.variable_name!r}, "
+            f"iterable={self.iterable}, "
+            f"body={self.body}"
+            f")"
+        )
