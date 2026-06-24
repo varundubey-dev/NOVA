@@ -67,12 +67,12 @@ class StatementInterpreter(InterpreterBase):
         return value
 
     def visit_print_statement(self, node):
-        value = self.visit(node.expression)
+        values = [self.visit(expression) for expression in node.expressions]
 
-        self.output.append(self.format_value(value))
+        self.output.append(" ".join(self.format_value(value) for value in values))
 
-        return value
-    
+        return None
+
     def visit_block_statement(self, node):
         previous_environment = self.environment
 
@@ -88,7 +88,7 @@ class StatementInterpreter(InterpreterBase):
 
         finally:
             self.environment = previous_environment
-            
+
     def visit_if_statement(self, node):
         condition = self.visit(node.condition)
 

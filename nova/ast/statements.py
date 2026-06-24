@@ -141,16 +141,16 @@ class PropertyAssignment(Statement):
 class PrintStatement(Statement):
     def __init__(
         self,
-        expression,
+        expressions,
         line=None,
         column=None,
     ):
         super().__init__(line, column)
 
-        self.expression = expression
+        self.expressions = expressions
 
     def __repr__(self):
-        return f"PrintStatement({self.expression})"
+        return f"PrintStatement({self.expressions})"
 
 
 class BlockStatement(Statement):

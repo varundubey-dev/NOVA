@@ -419,12 +419,22 @@ class Parser:
 
         self.consume(TokenType.LPAREN)
 
-        expression = self.parse_grouped_expression()
+        expressions = []
+
+        expressions.append(self.parse_expression())
+
+        while (
+            self.current_token is not None
+            and self.current_token.type == TokenType.COMMA
+        ):
+            self.advance()
+
+            expressions.append(self.parse_expression())
 
         self.consume(TokenType.RPAREN)
 
         return PrintStatement(
-            expression,
+            expressions,
             line=print_token.line,
             column=print_token.column,
         )

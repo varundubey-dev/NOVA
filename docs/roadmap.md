@@ -24,32 +24,33 @@
 
 ## v0.3 — Arrays
 
-[ ] Arrays
-[ ] Typed Arrays
-[ ] Multi-Type Arrays
-[ ] Nested Arrays
-[ ] Array Access
-[ ] Array Mutation
+[+] Arrays
+[+] Typed Arrays
+[+] Multi-Type Arrays
+[+] Nested Arrays
+[+] Array Access
+[+] Array Mutation
 
 ---
 
 ## v0.4 — Maps / Objects
 
-[ ] Maps / Objects
-[ ] Optional Properties
-[ ] Nested Maps
-[ ] Maps Containing Arrays
-[ ] Property Access
-[ ] Property Mutation
+[+] Maps / Objects
+[+] Optional Properties
+[+] Nested Maps
+[+] Maps Containing Arrays
+[+] Property Access
+[+] Property Mutation
 
 ---
 
 ## v0.5 — Conditional Execution
 
-[ ] If Statements
-[ ] Else Statements
-[ ] Else If Statements
-[ ] Block Scope
+[+] If Statements
+[+] Else Statements
+[+] Else If Statements
+[+] Block Scope
+[+] Ternary Operators
 
 ---
 
