@@ -125,3 +125,24 @@ class TernaryExpression(Expression):
             f"false_expression={self.false_expression}"
             f")"
         )
+
+class FunctionCall(Expression):
+    def __init__(
+        self,
+        callee,
+        arguments,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.callee = callee
+        self.arguments = arguments
+
+    def __repr__(self):
+        return (
+            f"FunctionCall("
+            f"callee={self.callee}, "
+            f"arguments={self.arguments}"
+            f")"
+        )

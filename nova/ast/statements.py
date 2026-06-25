@@ -1,4 +1,4 @@
-from nova.ast.base import Statement
+from nova.ast.base import Statement, Node
 
 
 class Program(Statement):
@@ -62,6 +62,56 @@ class ConstantDeclaration(Statement):
             f"name={self.name!r}, "
             f"const_type={self.const_type!r}, "
             f"value={self.value}"
+            f")"
+        )
+
+
+class FunctionDeclaration(Statement):
+    def __init__(
+        self,
+        name,
+        parameters,
+        body,
+        return_type=None,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.name = name
+        self.parameters = parameters
+        self.body = body
+        self.return_type = return_type
+
+    def __repr__(self):
+        return (
+            f"FunctionDeclaration("
+            f"name={self.name!r}, "
+            f"parameters={self.parameters}, "
+            f"return_type={self.return_type!r}, "
+            f"body={self.body}"
+            f")"
+        )
+
+
+class Parameter(Node):
+    def __init__(
+        self,
+        name,
+        parameter_type,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.name = name
+        self.parameter_type = parameter_type
+
+    def __repr__(self):
+        return (
+            f"Parameter("
+            f"name={self.name!r}, "
+            f"parameter_type={self.parameter_type!r}"
             f")"
         )
 
@@ -136,6 +186,21 @@ class PropertyAssignment(Statement):
         return (
             f"PropertyAssignment(" f"target={self.target}, " f"value={self.value}" f")"
         )
+
+
+class ReturnStatement(Statement):
+    def __init__(
+        self,
+        value=None,
+        line=None,
+        column=None,
+    ):
+        super().__init__(line, column)
+
+        self.value = value
+
+    def __repr__(self):
+        return f"ReturnStatement(" f"value={self.value}" f")"
 
 
 class PrintStatement(Statement):

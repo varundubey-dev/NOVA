@@ -8,10 +8,13 @@ from .statements import (
     Program,
     VariableDeclaration,
     ConstantDeclaration,
+    FunctionDeclaration,
+    Parameter,
     Assignment,
     ArrayAssignment,
     SchemaDeclaration,
     PropertyAssignment,
+    ReturnStatement,
     PrintStatement,
     BlockStatement,
     IfStatement,
@@ -29,6 +32,7 @@ from .expressions import (
     BinaryExpression,
     UnaryExpression,
     TernaryExpression,
+    FunctionCall,
 )
 
 from .literals import (
@@ -55,10 +59,13 @@ __all__ = [
     "Program",
     "VariableDeclaration",
     "ConstantDeclaration",
+    "FunctionDeclaration",
+    "Parameter",
     "Assignment",
     "ArrayAssignment",
     "SchemaDeclaration",
     "PropertyAssignment",
+    "ReturnStatement",
     "PrintStatement",
     "BlockStatement",
     "IfStatement",
@@ -74,6 +81,7 @@ __all__ = [
     "BinaryExpression",
     "UnaryExpression",
     "TernaryExpression",
+    "FunctionCall",
     # Literals
     "NumberLiteral",
     "StringLiteral",
