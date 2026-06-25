@@ -13,6 +13,7 @@ from nova.errors.parser_errors import (
     UnexpectedTokenError,
     UnexpectedEOFError,
     InvalidTypeError,
+    ReservedIdentifierError,
 )
 
 from nova.errors.runtime_errors import (
@@ -31,6 +32,7 @@ from nova.errors.runtime_errors import (
     StackOverflowError,
     FunctionArgumentCountError,
     MissingReturnError,
+    FunctionArgumentTypeError,
 )
 
 from nova.errors.type_errors import (
@@ -53,6 +55,7 @@ __all__ = [
     "UnexpectedTokenError",
     "UnexpectedEOFError",
     "InvalidTypeError",
+    "ReservedIdentifierError",
     "RuntimeError",
     "UndeclaredVariableError",
     "UninitializedVariableError",
@@ -68,6 +71,7 @@ __all__ = [
     "StackOverflowError",
     "FunctionArgumentCountError",
     "MissingReturnError",
+    "FunctionArgumentTypeError",
     "TypeError",
     "DatatypeMismatchError",
     "InvalidOperandError",

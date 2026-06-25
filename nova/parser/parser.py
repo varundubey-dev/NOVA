@@ -1,4 +1,5 @@
 from nova.lexer.token_types import TokenType
+from nova.lexer.lexer import RESERVED_IDENTIFIERS
 
 from nova.ast import (
     Program,
@@ -42,6 +43,7 @@ from nova.errors import (
     UnexpectedTokenError,
     UnexpectedEOFError,
     InvalidTypeError,
+    ReservedIdentifierError,
 )
 
 
@@ -93,6 +95,14 @@ class Parser:
         self.advance()
 
         return token
+
+    def ensure_identifier_available(self, token):
+        if token.value in RESERVED_IDENTIFIERS:
+            raise ReservedIdentifierError(
+                f"'{token.value}' is a reserved built-in function name.",
+                token.line,
+                token.column,
+            )
 
     def parse(self):
         statements = []
@@ -181,6 +191,7 @@ class Parser:
 
     def parse_variable_declaration(self):
         name_token = self.consume(TokenType.IDENTIFIER)
+        self.ensure_identifier_available(name_token)
 
         self.consume(TokenType.COLON)
 
@@ -206,6 +217,7 @@ class Parser:
 
     def parse_constant_declaration(self):
         name_token = self.consume(TokenType.IDENTIFIER)
+        self.ensure_identifier_available(name_token)
 
         self.consume(TokenType.DOUBLE_COLON)
 
@@ -349,6 +361,9 @@ class Parser:
 
             self.skip_expression_newlines()
 
+            if self.current_token is None:
+                break
+
             # -------------------------
             # Function Call
             # -------------------------
@@ -366,11 +381,25 @@ class Parser:
                 try:
                     self.skip_newlines()
 
+                    if self.current_token is None:
+                        raise UnexpectedEOFError(
+                            "Unexpected EOF while parsing function call.",
+                            line,
+                            column,
+                        )
+
                     if self.current_token.type != TokenType.RPAREN:
                         while True:
                             arguments.append(self.parse_expression())
 
                             self.skip_newlines()
+
+                            if self.current_token is None:
+                                raise UnexpectedEOFError(
+                                    "Unexpected EOF while parsing function call.",
+                                    line,
+                                    column,
+                                )
 
                             if self.current_token.type != TokenType.COMMA:
                                 break
@@ -440,21 +469,31 @@ class Parser:
 
         seen_bracket = False
         last_meaningful = None
+        paren_depth = 0
 
         while pos < len(self.tokens):
             token = self.tokens[pos]
 
-            if token.type == TokenType.LBRACKET:
+            if token.type == TokenType.LPAREN:
+                paren_depth += 1
+
+            elif token.type == TokenType.RPAREN:
+                paren_depth -= 1
+
+            elif token.type == TokenType.NEWLINE and paren_depth == 0:
+                return False
+
+            elif token.type == TokenType.LBRACKET:
                 seen_bracket = True
 
             elif token.type == TokenType.EQUALS:
                 return seen_bracket and last_meaningful == TokenType.RBRACKET
 
-            elif token.type not in (TokenType.NEWLINE,):
-                last_meaningful = token.type
-
-            if token.type == TokenType.EOF:
+            elif token.type == TokenType.EOF:
                 return False
+
+            elif token.type != TokenType.NEWLINE:
+                last_meaningful = token.type
 
             pos += 1
 
@@ -881,6 +920,7 @@ class Parser:
 
     def parse_schema_declaration(self):
         name_token = self.consume(TokenType.IDENTIFIER)
+        self.ensure_identifier_available(name_token)
 
         self.consume(TokenType.COLON)
 
@@ -1035,21 +1075,31 @@ class Parser:
 
         seen_property = False
         last_meaningful = None
+        paren_depth = 0
 
         while pos < len(self.tokens):
             token = self.tokens[pos]
 
-            if token.type == TokenType.DOT:
+            if token.type == TokenType.LPAREN:
+                paren_depth += 1
+
+            elif token.type == TokenType.RPAREN:
+                paren_depth -= 1
+
+            elif token.type == TokenType.NEWLINE and paren_depth == 0:
+                return False
+
+            elif token.type == TokenType.DOT:
                 seen_property = True
 
             elif token.type == TokenType.EQUALS:
                 return seen_property and last_meaningful != TokenType.RBRACKET
 
-            elif token.type not in (TokenType.NEWLINE,):
-                last_meaningful = token.type
-
-            if token.type == TokenType.EOF:
+            elif token.type == TokenType.EOF:
                 return False
+
+            elif token.type != TokenType.NEWLINE:
+                last_meaningful = token.type
 
             pos += 1
 
@@ -1190,6 +1240,7 @@ class Parser:
         for_token = self.consume(TokenType.FOR)
 
         variable_token = self.consume(TokenType.IDENTIFIER)
+        self.ensure_identifier_available(variable_token)
 
         self.consume(TokenType.IN)
 
@@ -1237,6 +1288,7 @@ class Parser:
         for_token = self.consume(TokenType.FOR)
 
         variable_token = self.consume(TokenType.IDENTIFIER)
+        self.ensure_identifier_available(variable_token)
 
         self.consume(TokenType.IN)
 
@@ -1272,6 +1324,7 @@ class Parser:
         fn_token = self.consume(TokenType.FN)
 
         name = self.consume(TokenType.IDENTIFIER)
+        self.ensure_identifier_available(name)
 
         self.consume(TokenType.LPAREN)
 
@@ -1289,6 +1342,7 @@ class Parser:
         if self.current_token.type != TokenType.RPAREN:
             while True:
                 parameter_name = self.consume(TokenType.IDENTIFIER)
+                self.ensure_identifier_available(parameter_name)
 
                 self.consume(TokenType.COLON)
 

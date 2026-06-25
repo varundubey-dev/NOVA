@@ -55,3 +55,6 @@ class FunctionArgumentCountError(RuntimeError):
 
 class MissingReturnError(RuntimeError):
     pass
+
+class FunctionArgumentTypeError(RuntimeError):
+    pass

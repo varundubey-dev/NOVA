@@ -15,3 +15,6 @@ class UnexpectedEOFError(ParserError):
 
 class InvalidTypeError(ParserError):
     pass
+
+class ReservedIdentifierError(ParserError):
+    pass

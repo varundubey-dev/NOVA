@@ -1,5 +1,6 @@
 from nova.interpreter.statements import StatementInterpreter
 from nova.interpreter.loop_signals import ReturnSignal
+from nova.interpreter.builtins.registry import BUILTINS
 
 from nova.interpreter.runtime_values import (
     NumberValue,
@@ -47,6 +48,28 @@ class ExpressionInterpreter(StatementInterpreter):
         )
 
     def visit_function_call(self, node):
+        argument_nodes = node.arguments
+
+        arguments = [self.visit(argument) for argument in argument_nodes]
+
+        # -------------------------
+        # Built-in Functions
+        # -------------------------
+
+        builtin = BUILTINS.get(node.callee.name)
+
+        if builtin is not None:
+            return builtin(
+                self,
+                argument_nodes,
+                arguments,
+                node,
+            )
+
+        # -------------------------
+        # User-defined Functions
+        # -------------------------
+
         self.enter_function()
 
         try:
@@ -62,8 +85,6 @@ class ExpressionInterpreter(StatementInterpreter):
                 node.line,
                 node.column,
             )
-
-            arguments = [self.visit(argument) for argument in node.arguments]
 
             if len(arguments) != len(function.parameters):
                 raise FunctionArgumentCountError(
@@ -104,7 +125,6 @@ class ExpressionInterpreter(StatementInterpreter):
 
                     return signal.value
 
-                # Function finished without executing a return statement.
                 if function.return_type is not None:
                     raise MissingReturnError(
                         f"Function '{function.name}' must return a value.",

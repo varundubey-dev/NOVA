@@ -26,6 +26,47 @@ KEYWORDS = {
 
 TYPES = {"S", "N", "B", "U", "M"}
 
+BUILTIN_FUNCTIONS = {
+    # Array
+    "length",
+    "push",
+    "pop",
+    "insert",
+    "remove",
+    "contains",
+    "clear",
+
+    # Conversions
+    "toString",
+    "toNumber",
+    "toBoolean",
+
+    # Input
+    "input",
+
+    # Math
+    "abs",
+    "min",
+    "max",
+    "pow",
+    "sqrt",
+    "round",
+    "floor",
+    "ceil",
+    "random",
+
+    # String
+    "upper",
+    "lower",
+    "trim",
+    "startsWith",
+    "endsWith",
+    "replace",
+    "split",
+}
+
+RESERVED_IDENTIFIERS = BUILTIN_FUNCTIONS
+
 
 class Lexer:
     def __init__(self, source: str):
