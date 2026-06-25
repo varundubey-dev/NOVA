@@ -28,6 +28,9 @@ from nova.ast import (
     PropertyAssignment,
     BreakStatement,
     ContinueStatement,
+    FunctionDeclaration,
+    FunctionCall,
+    ReturnStatement,
 )
 
 
@@ -37,6 +40,9 @@ class InterpreterBase:
         self.output = []
 
         self.loop_depth = 0
+        
+        self.call_depth = 0
+        self.max_call_depth = 500
 
     def interpret(self, program):
         return self.visit(program)
@@ -83,6 +89,12 @@ class InterpreterBase:
 
         if isinstance(node, ContinueStatement):
             return self.visit_continue_statement(node)
+        
+        if isinstance(node, FunctionDeclaration):
+            return self.visit_function_declaration(node)
+
+        if isinstance(node, ReturnStatement):
+            return self.visit_return_statement(node)
 
         if isinstance(node, NumberLiteral):
             return self.visit_number_literal(node)
@@ -113,6 +125,9 @@ class InterpreterBase:
 
         if isinstance(node, Identifier):
             return self.visit_identifier(node)
+        
+        if isinstance(node, FunctionCall):
+            return self.visit_function_call(node)
 
         if isinstance(node, UnaryExpression):
             return self.visit_unary_expression(node)
@@ -142,6 +157,12 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_schema_declaration(self, node):
+        raise NotImplementedError
+    
+    def visit_function_declaration(self, node):
+        raise NotImplementedError
+
+    def visit_return_statement(self, node):
         raise NotImplementedError
 
     def visit_property_assignment(self, node):
@@ -188,6 +209,9 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_identifier(self, node):
+        raise NotImplementedError
+    
+    def visit_function_call(self, node):
         raise NotImplementedError
 
     # -------------------------
@@ -243,3 +267,9 @@ class InterpreterBase:
 
     def exit_loop(self):
         self.loop_depth -= 1
+        
+    def enter_function(self):
+        self.call_depth += 1
+
+    def exit_function(self):
+        self.call_depth -= 1

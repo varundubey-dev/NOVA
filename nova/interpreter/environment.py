@@ -10,11 +10,13 @@ from nova.interpreter.runtime_values import (
 from nova.ast import ArrayType
 
 from nova.errors import (
+    RuntimeError,
     DatatypeMismatchError,
     DuplicateDeclarationError,
     UndeclaredVariableError,
     UninitializedVariableError,
     ConstantReassignmentError,
+    UndeclaredFunctionError,
 )
 
 
@@ -24,6 +26,7 @@ class Environment:
 
         self.variables = {}
         self.schemas = {}
+        self.functions = {}
 
     def resolve_variable(
         self,
@@ -117,7 +120,7 @@ class Environment:
                         valid = True
                         break
 
-                    except Exception:
+                    except DatatypeMismatchError:
                         pass
 
                 if not valid:
@@ -239,7 +242,7 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name in self.variables or name in self.schemas:
+        if name in self.variables or name in self.schemas or name in self.functions:
             raise DuplicateDeclarationError(
                 f"Variable '{name}' already declared.",
                 line,
@@ -260,6 +263,22 @@ class Environment:
             "constant": False,
         }
 
+    def declare_function(
+        self,
+        name,
+        function,
+        line=None,
+        column=None,
+    ):
+        if name in self.variables or name in self.schemas or name in self.functions:
+            raise DuplicateDeclarationError(
+                f"Function '{name}' already declared.",
+                line,
+                column,
+            )
+
+        self.functions[name] = function
+
     def declare_schema(
         self,
         name,
@@ -267,7 +286,7 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name in self.schemas or name in self.variables:
+        if name in self.schemas or name in self.variables or name in self.functions:
             raise DuplicateDeclarationError(
                 f"Schema '{name}' already declared.",
                 line,
@@ -284,7 +303,7 @@ class Environment:
         line=None,
         column=None,
     ):
-        if name in self.variables or name in self.schemas:
+        if name in self.variables or name in self.schemas or name in self.functions:
             raise DuplicateDeclarationError(
                 f"Variable '{name}' already declared.",
                 line,
@@ -376,3 +395,29 @@ class Environment:
 
     def create_child(self):
         return Environment(parent=self)
+
+    def get_function(
+        self,
+        name,
+        line=None,
+        column=None,
+    ):
+        env = self
+        visited = set()
+
+        while env is not None:
+            if id(env) in visited:
+                raise RuntimeError("Environment cycle detected.")
+
+            visited.add(id(env))
+
+            if name in env.functions:
+                return env.functions[name]
+
+            env = env.parent
+
+        raise UndeclaredFunctionError(
+            f"Function '{name}' is not declared.",
+            line,
+            column,
+        )

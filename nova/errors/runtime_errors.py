@@ -43,3 +43,15 @@ class NotIterableError(RuntimeError):
 
 class InvalidLoopControlError(RuntimeError):
     pass
+
+class UndeclaredFunctionError(RuntimeError):
+    pass
+
+class StackOverflowError(RuntimeError):
+    pass
+
+class FunctionArgumentCountError(RuntimeError):
+    pass
+
+class MissingReturnError(RuntimeError):
+    pass

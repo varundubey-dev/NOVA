@@ -27,6 +27,10 @@ from nova.errors.runtime_errors import (
     InvalidRangeError,
     NotIterableError,
     InvalidLoopControlError,
+    UndeclaredFunctionError,
+    StackOverflowError,
+    FunctionArgumentCountError,
+    MissingReturnError,
 )
 
 from nova.errors.type_errors import (
@@ -60,6 +64,10 @@ __all__ = [
     "InvalidRangeError",
     "NotIterableError",
     "InvalidLoopControlError",
+    "UndeclaredFunctionError",
+    "StackOverflowError",
+    "FunctionArgumentCountError",
+    "MissingReturnError",
     "TypeError",
     "DatatypeMismatchError",
     "InvalidOperandError",

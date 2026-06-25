@@ -52,3 +52,16 @@ class MapValue(RuntimeValue):
 
     def __repr__(self):
         return f"MapValue({self.value})"
+
+
+class FunctionValue(RuntimeValue):
+    def __init__(self, name, parameters, body, return_type):
+        super().__init__(None)
+
+        self.name = name
+        self.parameters = parameters
+        self.body = body
+        self.return_type = return_type
+
+    def __repr__(self):
+        return f"FunctionValue({self.name})"

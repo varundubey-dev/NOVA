@@ -1,4 +1,5 @@
 from nova.interpreter.statements import StatementInterpreter
+from nova.interpreter.loop_signals import ReturnSignal
 
 from nova.interpreter.runtime_values import (
     NumberValue,
@@ -14,6 +15,9 @@ from nova.errors import (
     UnknownOperatorError,
     NullOperationError,
     ConditionTypeError,
+    StackOverflowError,
+    FunctionArgumentCountError,
+    MissingReturnError,
 )
 
 
@@ -41,7 +45,79 @@ class ExpressionInterpreter(StatementInterpreter):
             node.line,
             node.column,
         )
-        
+
+    def visit_function_call(self, node):
+        self.enter_function()
+
+        try:
+            if self.call_depth > self.max_call_depth:
+                raise StackOverflowError(
+                    "Maximum function call depth exceeded.",
+                    node.line,
+                    node.column,
+                )
+
+            function = self.environment.get_function(
+                node.callee.name,
+                node.line,
+                node.column,
+            )
+
+            arguments = [self.visit(argument) for argument in node.arguments]
+
+            if len(arguments) != len(function.parameters):
+                raise FunctionArgumentCountError(
+                    f"Function '{function.name}' expects "
+                    f"{len(function.parameters)} argument(s), "
+                    f"got {len(arguments)}."
+                )
+
+            previous_environment = self.environment
+            self.environment = previous_environment.create_child()
+
+            try:
+                for parameter, argument in zip(
+                    function.parameters,
+                    arguments,
+                ):
+                    self.environment.declare_variable(
+                        parameter.name,
+                        parameter.parameter_type,
+                        argument,
+                        node.line,
+                        node.column,
+                    )
+
+                try:
+                    self.visit(function.body)
+
+                except ReturnSignal as signal:
+                    if function.return_type is not None:
+                        previous_environment.validate_type(
+                            function.return_type,
+                            signal.value,
+                            node.line,
+                            node.column,
+                        )
+
+                    return signal.value
+
+                # Function finished without executing a return statement.
+                if function.return_type is not None:
+                    raise MissingReturnError(
+                        f"Function '{function.name}' must return a value.",
+                        node.line,
+                        node.column,
+                    )
+
+                return None
+
+            finally:
+                self.environment = previous_environment
+
+        finally:
+            self.exit_function()
+
     # -------------------------
     # Condition Validation
     # -------------------------
@@ -276,7 +352,7 @@ class ExpressionInterpreter(StatementInterpreter):
             node.line,
             node.column,
         )
-        
+
     # -------------------------
     # Ternary Expressions
     # -------------------------

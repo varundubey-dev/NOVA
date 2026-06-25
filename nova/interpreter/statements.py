@@ -1,13 +1,16 @@
 from nova.interpreter.base import InterpreterBase
+from nova.ast import FunctionDeclaration
 from nova.interpreter.runtime_values import (
     BooleanValue,
     NumberValue,
     ArrayValue,
+    FunctionValue,
 )
 
 from nova.interpreter.loop_signals import (
     BreakSignal,
     ContinueSignal,
+    ReturnSignal,
 )
 
 from nova.errors import (
@@ -23,6 +26,13 @@ class StatementInterpreter(InterpreterBase):
         result = None
 
         for statement in node.statements:
+            if isinstance(statement, FunctionDeclaration):
+                self.visit(statement)
+
+        for statement in node.statements:
+            if isinstance(statement, FunctionDeclaration):
+                continue
+
             result = self.visit(statement)
 
         return result
@@ -63,6 +73,23 @@ class StatementInterpreter(InterpreterBase):
         self.environment.declare_schema(
             node.name,
             node.schema,
+            node.line,
+            node.column,
+        )
+
+        return None
+    
+    def visit_function_declaration(self, node):
+        function = FunctionValue(
+            name=node.name,
+            parameters=node.parameters,
+            body=node.body,
+            return_type=node.return_type,
+        )
+
+        self.environment.declare_function(
+            node.name,
+            function,
             node.line,
             node.column,
         )
@@ -284,3 +311,11 @@ class StatementInterpreter(InterpreterBase):
             )
 
         raise ContinueSignal()
+
+    def visit_return_statement(self, node):
+        value = None
+
+        if node.value is not None:
+            value = self.visit(node.value)
+
+        raise ReturnSignal(value)
