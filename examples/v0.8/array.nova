@@ -1,0 +1,427 @@
+// ======================================================
+// NOVA BUILT-IN ARRAY FUNCTIONS TEST
+// ======================================================
+
+User: M = {
+    name: S,
+    scores: [N]
+}
+
+users: [User] = [
+
+    {
+        name = "Alice",
+        scores = [
+            90,
+            80
+        ]
+    },
+
+    {
+        name = "Bob",
+        scores = [
+            70,
+            60
+        ]
+    }
+
+]
+
+// ======================================================
+// BASIC ARRAY
+// ======================================================
+
+numbers: [N] = [
+    10,
+    20,
+    30
+]
+
+print("INITIAL", numbers)
+
+print(
+    "LENGTH",
+    length(numbers)
+)
+
+push(
+    numbers,
+    40
+)
+
+print(
+    "PUSH",
+    numbers
+)
+
+
+insert(
+    numbers,
+    2,
+    25
+)
+
+print(
+    "INSERT",
+    numbers
+)
+
+print(
+    "POP",
+    pop(numbers)
+)
+
+print(
+    "AFTER POP",
+    numbers
+)
+
+remove(
+    numbers,
+    1
+)
+
+print(
+    "REMOVE",
+    numbers
+)
+
+print(
+    "CONTAINS 25",
+    contains(
+        numbers,
+        25
+    )
+)
+
+print(
+    "CONTAINS 20",
+    contains(
+        numbers,
+        20
+    )
+)
+
+clear(numbers)
+
+print(
+    "CLEAR",
+    numbers
+)
+
+// ======================================================
+// NESTED ARRAYS
+// ======================================================
+
+matrix: [[N]] = [
+
+    [
+        1,
+        2
+    ],
+
+    [
+        3,
+        4
+    ]
+
+]
+
+print(
+    "ROWS",
+    length(matrix)
+)
+
+print(
+    "COLS",
+    length(
+        matrix[0]
+    )
+)
+
+push(
+    matrix[0],
+    100
+)
+
+insert(
+    matrix[1],
+    1,
+    999
+)
+
+print(matrix)
+
+print(
+    pop(
+        matrix[0]
+    )
+)
+
+remove(
+    matrix[1],
+    0
+)
+
+print(matrix)
+
+// ======================================================
+// MAP ARRAYS
+// ======================================================
+
+push(
+    users[0].scores,
+    100
+)
+
+insert(
+    users[1].scores,
+    0,
+    50
+)
+
+print(
+    users[0].scores
+)
+
+print(
+    users[1].scores
+)
+
+print(
+    contains(
+        users[0].scores,
+        100
+    )
+)
+
+print(
+    length(
+        users[1].scores
+    )
+)
+
+// ======================================================
+// LOOPS
+// ======================================================
+
+values: [N] = []
+
+for i in 1...10 {
+
+    push(
+        values,
+        i
+    )
+
+}
+
+print(values)
+
+for value in values {
+
+    print(
+        value
+    )
+
+}
+
+while length(values) > 5 {
+
+    print(
+        "POPPED",
+        pop(values)
+    )
+
+}
+
+print(values)
+
+// ======================================================
+// BUILTINS INSIDE EXPRESSIONS
+// ======================================================
+
+print(
+
+    length(values) +
+    100
+
+)
+
+print(
+
+    contains(
+        values,
+        3
+    )
+        ? "FOUND"
+        : "NOT FOUND"
+
+)
+
+// ======================================================
+// RETURN ARRAY FROM FUNCTION
+// ======================================================
+
+fn build() -> [N] {
+
+    data: [N] = [
+        1,
+        2,
+        3
+    ]
+
+    push(
+        data,
+        4
+    )
+
+    insert(
+        data,
+        0,
+        0
+    )
+
+    return data
+
+}
+
+built: [N] = build()
+
+print(built)
+
+print(
+    length(
+        built
+    )
+)
+
+// ======================================================
+// DEEP NESTING
+// ======================================================
+
+cube: [[[N]]] = [
+
+    [
+
+        [
+            1,
+            2
+        ],
+
+        [
+            3,
+            4
+        ]
+
+    ]
+
+]
+
+push(
+    cube[0][0],
+    99
+)
+
+insert(
+    cube[0][1],
+    1,
+    500
+)
+
+print(cube)
+
+print(
+
+    length(
+        cube
+    ),
+
+    length(
+        cube[0]
+    ),
+
+    length(
+        cube[0][0]
+    )
+
+)
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+INITIAL [10, 20, 30]
+
+LENGTH 3
+
+PUSH [10, 20, 30, 40]
+
+INSERT [10, 20, 25, 30, 40]
+
+POP 40
+
+AFTER POP [10, 20, 25, 30]
+
+REMOVE [10, 25, 30]
+
+CONTAINS 25 true
+
+CONTAINS 20 false
+
+CLEAR []
+
+ROWS 2
+
+COLS 2
+
+[[1, 2, 100], [3, 999, 4]]
+
+100
+
+[[1, 2], [999, 4]]
+
+[90, 80, 100]
+
+[50, 70, 60]
+
+true
+
+3
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+POPPED 10
+POPPED 9
+POPPED 8
+POPPED 7
+POPPED 6
+
+[1, 2, 3, 4, 5]
+
+105
+
+FOUND
+
+[0, 1, 2, 3, 4]
+
+5
+
+[[[1, 2, 99], [3, 500, 4]]]
+
+1 2 3
+
+*/

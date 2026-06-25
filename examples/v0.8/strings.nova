@@ -1,0 +1,483 @@
+// ======================================================
+// NOVA BUILT-IN STRING FUNCTIONS TEST
+// ======================================================
+
+User: M = {
+    name: S,
+    city: S
+}
+
+user: User = {
+    name = "   varun dubey   ",
+    city = "mumbai"
+}
+
+// ======================================================
+// BASIC
+// ======================================================
+
+text: S = "   Hello World   "
+
+print(text)
+
+print(
+    length(text)
+)
+
+print(
+    trim(text)
+)
+
+print(
+    upper(text)
+)
+
+print(
+    lower(text)
+)
+
+// ======================================================
+// CONTAINS
+// ======================================================
+
+print(
+    contains(
+        text,
+        "World"
+    )
+)
+
+print(
+    contains(
+        text,
+        "Python"
+    )
+)
+
+// ======================================================
+// STARTS / ENDS
+// ======================================================
+
+print(
+    startsWith(
+        trim(text),
+        "Hello"
+    )
+)
+
+print(
+    endsWith(
+        trim(text),
+        "World"
+    )
+)
+
+print(
+    startsWith(
+        trim(text),
+        "World"
+    )
+)
+
+print(
+    endsWith(
+        trim(text),
+        "Hello"
+    )
+)
+
+// ======================================================
+// REPLACE
+// ======================================================
+
+print(
+    replace(
+        text,
+        "World",
+        "NOVA"
+    )
+)
+
+print(
+    replace(
+        trim(text),
+        "Hello",
+        "Hi"
+    )
+)
+
+// ======================================================
+// SPLIT
+// ======================================================
+
+words: [S] = split(
+    trim(text),
+    " "
+)
+
+print(words)
+
+print(
+    words[0]
+)
+
+print(
+    words[1]
+)
+
+print(
+    length(words)
+)
+
+// ======================================================
+// FUNCTION RETURN
+// ======================================================
+
+fn greet() -> S {
+
+    return trim(
+        upper(
+            "   hello nova   "
+        )
+    )
+
+}
+
+print(
+    greet()
+)
+
+// ======================================================
+// FUNCTION + SPLIT
+// ======================================================
+
+fn language() -> [S] {
+
+    return split(
+        "NOVA Programming Language",
+        " "
+    )
+
+}
+
+parts: [S] = language()
+
+print(parts)
+
+print(
+    parts[0]
+)
+
+print(
+    parts[1]
+)
+
+print(
+    parts[2]
+)
+
+// ======================================================
+// MAPS
+// ======================================================
+
+print(
+
+    upper(
+        trim(
+            user.name
+        )
+    )
+
+)
+
+print(
+
+    replace(
+        upper(user.city),
+        "MUMBAI",
+        "PUNE"
+    )
+
+)
+
+// ======================================================
+// BUILTINS INSIDE EXPRESSIONS
+// ======================================================
+
+print(
+
+    length(
+
+        upper(
+
+            trim(text)
+
+        )
+
+    )
+
+)
+
+print(
+
+    contains(
+
+        lower(text),
+
+        "hello"
+
+    )
+
+        ? "FOUND"
+
+        : "NOT FOUND"
+
+)
+
+// ======================================================
+// NESTED SPLITS
+// ======================================================
+
+sentence: S = "one,two,three,four"
+
+values: [S] = split(
+    sentence,
+    ","
+)
+
+print(values)
+
+for value in values {
+
+    print(
+        upper(value)
+    )
+
+}
+
+// ======================================================
+// DEEP FUNCTION CHAIN
+// ======================================================
+
+print(
+
+    upper(
+
+        replace(
+
+            trim(
+
+                lower(
+
+                    "    HELLO NOVA    "
+
+                )
+
+            ),
+
+            "nova",
+
+            "language"
+
+        )
+
+    )
+
+)
+
+// ======================================================
+// SPLIT INSIDE SPLIT
+// ======================================================
+
+complex: S =
+    "alpha-beta gamma"
+
+print(
+
+    split(
+
+        split(
+            complex,
+            " "
+        )[0],
+
+        "-"
+
+    )
+
+)
+
+print(
+
+    split(
+
+        split(
+            complex,
+            " "
+        )[0],
+
+        "-"
+
+    )[0]
+
+)
+
+print(
+
+    split(
+
+        split(
+            complex,
+            " "
+        )[0],
+
+        "-"
+
+    )[1]
+
+)
+
+// ======================================================
+// LOOPS
+// ======================================================
+
+names: [S] = [
+
+    "alice",
+
+    "bob",
+
+    "charlie"
+
+]
+
+for name in names {
+
+    print(
+
+        upper(name),
+
+        length(name)
+
+    )
+
+}
+
+// ======================================================
+// COMPLEX
+// ======================================================
+
+print(
+
+    endsWith(
+
+        replace(
+
+            upper(
+
+                trim(
+
+                    "  hello nova  "
+
+                )
+
+            ),
+
+            "NOVA",
+
+            "WORLD"
+
+        ),
+
+        "WORLD"
+
+    )
+
+)
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+   Hello World
+
+17
+
+Hello World
+
+   HELLO WORLD
+
+   hello world
+
+true
+
+false
+
+true
+
+true
+
+false
+
+false
+
+   Hello NOVA
+
+Hi World
+
+[Hello, World]
+
+Hello
+
+World
+
+2
+
+HELLO NOVA
+
+[NOVA, Programming, Language]
+
+NOVA
+
+Programming
+
+Language
+
+VARUN DUBEY
+
+PUNE
+
+11
+
+FOUND
+
+[one, two, three, four]
+
+ONE
+TWO
+THREE
+FOUR
+
+HELLO LANGUAGE
+
+[alpha, beta]
+
+alpha
+
+beta
+
+ALICE 5
+
+BOB 3
+
+CHARLIE 7
+
+true
+
+*/
+
+// ======================================================
+// END
+// ======================================================

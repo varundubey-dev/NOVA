@@ -1,0 +1,335 @@
+// ======================================================
+// NOVA BUILT-IN INPUT FUNCTION TEST
+// ======================================================
+//
+// Enter these values when prompted:
+//
+// Varun
+// 19
+// true
+// Mumbai
+// 95
+//
+// ======================================================
+
+User: M = {
+    name: S,
+    age: N,
+    city: S
+}
+
+// ======================================================
+// BASIC INPUT
+// ======================================================
+
+name: S = input(
+    "Enter name: "
+)
+
+print(name)
+
+// ======================================================
+// CONVERSIONS
+// ======================================================
+
+age: N = toNumber(
+
+    input(
+        "Enter age: "
+    )
+
+)
+
+print(age)
+
+active: B = toBoolean(
+
+    input(
+        "Are you active (true/false): "
+    )
+
+)
+
+print(active)
+
+// ======================================================
+// MAPS
+// ======================================================
+
+user: User = {
+
+    name = name,
+
+    age = age,
+
+    city = input(
+        "Enter city: "
+    )
+
+}
+
+print(user)
+
+print(
+    user.name
+)
+
+print(
+    user.city
+)
+
+// ======================================================
+// BUILTINS
+// ======================================================
+
+print(
+
+    upper(
+        user.name
+    )
+
+)
+
+print(
+
+    length(
+        user.city
+    )
+
+)
+
+// ======================================================
+// FUNCTIONS
+// ======================================================
+
+fn greet(
+    person: User
+) {
+
+    print(
+
+        "WELCOME",
+
+        upper(
+            person.name
+        )
+
+    )
+
+}
+
+greet(user)
+
+// ======================================================
+// FUNCTION RETURN
+// ======================================================
+
+fn readScore() -> N {
+
+    return toNumber(
+
+        input(
+            "Enter score: "
+        )
+
+    )
+
+}
+
+score: N = readScore()
+
+print(score)
+
+// ======================================================
+// TERNARY
+// ======================================================
+
+print(
+
+    score >= 50
+
+        ? "PASS"
+
+        : "FAIL"
+
+)
+
+// ======================================================
+// ARRAYS
+// ======================================================
+
+scores: [N] = [
+
+    score,
+
+    age,
+
+    100
+
+]
+
+print(scores)
+
+for value in scores {
+
+    print(value)
+
+}
+
+// ======================================================
+// WHILE
+// ======================================================
+
+counter: N = 0
+
+while counter < 3 {
+
+    print(
+
+        counter
+
+    )
+
+    counter = counter + 1
+
+}
+
+// ======================================================
+// DEEP EXPRESSIONS
+// ======================================================
+
+print(
+
+    upper(
+
+        trim(
+
+            input(
+
+                "Enter another name: "
+
+            )
+
+        )
+
+    )
+
+)
+
+print(
+
+    toString(
+
+        toNumber(
+
+            input(
+
+                "Enter another number: "
+
+            )
+
+        )
+
+    )
+
+)
+
+print(
+
+    contains(
+
+        lower(
+
+            input(
+
+                "Type a sentence: "
+
+            )
+
+        ),
+
+        "nova"
+
+    )
+
+)
+
+// ======================================================
+// EXPECTED INTERACTION
+// ======================================================
+
+/*
+
+Enter name:
+Varun
+
+Enter age:
+19
+
+Are you active:
+true
+
+Enter city:
+Mumbai
+
+Enter score:
+95
+
+Enter another name:
+   nova language
+
+Enter another number:
+12345
+
+Type a sentence:
+I love nova language
+
+*/
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+Varun
+19
+true
+
+{ name = Varun, age = 19, city = Mumbai }
+
+Varun
+
+Mumbai
+
+VARUN
+
+6
+
+WELCOME VARUN
+
+95
+
+PASS
+
+[95, 19, 100]
+
+95
+19
+100
+
+0
+1
+2
+
+NOVA LANGUAGE
+
+12345
+
+true
+
+*/
+
+// ======================================================
+// END
+// ======================================================

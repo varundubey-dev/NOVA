@@ -1,0 +1,448 @@
+// ======================================================
+// NOVA BUILT-IN CONVERSION FUNCTIONS TEST
+// ======================================================
+
+User: M = {
+    name: S,
+    age: S,
+    active: S
+}
+
+user: User = {
+    name = "Varun",
+    age = "19",
+    active = "true"
+}
+
+// ======================================================
+// BASIC CONVERSIONS
+// ======================================================
+
+print(
+    toString(123)
+)
+
+print(
+    toString(true)
+)
+
+print(
+    toString(null)
+)
+
+print(
+    toNumber("100")
+)
+
+print(
+    toNumber("3.14")
+)
+
+print(
+    toBoolean("true")
+)
+
+print(
+    toBoolean("false")
+)
+
+// ======================================================
+// VARIABLES
+// ======================================================
+
+age: N = toNumber(user.age)
+
+flag: B = toBoolean(user.active)
+
+text: S = toString(age)
+
+print(age)
+print(flag)
+print(text)
+
+// ======================================================
+// ARRAYS
+// ======================================================
+
+numbers: [N] = [
+
+    toNumber("1"),
+
+    toNumber("2"),
+
+    toNumber("3")
+
+]
+
+print(numbers)
+
+print(
+    toString(numbers)
+)
+
+// ======================================================
+// MAPS
+// ======================================================
+
+print(
+    toString(user)
+)
+
+print(
+    toNumber(user.age)
+)
+
+print(
+    toBoolean(user.active)
+)
+
+// ======================================================
+// EXPRESSIONS
+// ======================================================
+
+print(
+
+    toNumber("10") +
+
+    toNumber("20")
+
+)
+
+print(
+
+    toNumber(
+
+        toString(50)
+
+    )
+
+)
+
+print(
+
+    toString(
+
+        toNumber("999")
+
+    )
+
+)
+
+// ======================================================
+// FUNCTIONS
+// ======================================================
+
+fn getNumber() -> N {
+
+    return toNumber("500")
+
+}
+
+fn getBoolean() -> B {
+
+    return toBoolean("true")
+
+}
+
+fn getString() -> S {
+
+    return toString(12345)
+
+}
+
+print(
+    getNumber()
+)
+
+print(
+    getBoolean()
+)
+
+print(
+    getString()
+)
+
+// ======================================================
+// DEEP NESTING
+// ======================================================
+
+print(
+
+    toString(
+
+        toNumber(
+
+            toString(
+
+                toNumber(
+
+                    "123"
+
+                )
+
+            )
+
+        )
+
+    )
+
+)
+
+print(
+
+    toBoolean(
+
+        toString(
+
+            toBoolean(
+
+                "true"
+
+            )
+
+        )
+
+    )
+
+)
+
+// ======================================================
+// TERNARY
+// ======================================================
+
+print(
+
+    toBoolean("true")
+
+        ? toString(100)
+
+        : toString(0)
+
+)
+
+print(
+
+    toBoolean("false")
+
+        ? toString(100)
+
+        : toString(0)
+
+)
+
+// ======================================================
+// LOOPS
+// ======================================================
+
+values: [S] = [
+
+    "1",
+
+    "2",
+
+    "3",
+
+    "4",
+
+    "5"
+
+]
+
+for value in values {
+
+    print(
+
+        toNumber(value)
+
+    )
+
+}
+
+index: N = 0
+
+while index < 5 {
+
+    print(
+
+        toString(index)
+
+    )
+
+    index = index + 1
+
+}
+
+// ======================================================
+// RECURSION
+// ======================================================
+
+fn factorial(
+    n: N
+) -> N {
+
+    if n <= 1 {
+
+        return 1
+
+    }
+
+    return n * factorial(
+        n - 1
+    )
+
+}
+
+print(
+
+    toString(
+
+        factorial(
+
+            toNumber("5")
+
+        )
+
+    )
+
+)
+
+// ======================================================
+// ARRAYS OF MAPS
+// ======================================================
+
+users: [User] = [
+
+    {
+        name = "Alice",
+        age = "20",
+        active = "true"
+    },
+
+    {
+        name = "Bob",
+        age = "30",
+        active = "false"
+    }
+
+]
+
+for person in users {
+
+    print(
+
+        person.name,
+
+        toNumber(person.age),
+
+        toBoolean(person.active)
+
+    )
+
+}
+
+// ======================================================
+// VERY DEEP
+// ======================================================
+
+print(
+
+    toString(
+
+        toNumber(
+
+            toString(
+
+                toNumber(
+
+                    toString(
+
+                        toNumber(
+
+                            "42"
+
+                        )
+
+                    )
+
+                )
+
+            )
+
+        )
+
+    )
+
+)
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+123
+true
+null
+100
+3.14
+true
+false
+
+19
+true
+19
+
+[1, 2, 3]
+
+[1, 2, 3]
+
+{ name = Varun, age = 19, active = true }
+
+19
+
+true
+
+30
+
+50
+
+999
+
+500
+
+true
+
+12345
+
+123
+
+true
+
+100
+
+0
+
+1
+2
+3
+4
+5
+
+0
+1
+2
+3
+4
+
+120
+
+Alice 20 true
+Bob 30 false
+
+42
+
+*/
+
+// ======================================================
+// END
+// ======================================================

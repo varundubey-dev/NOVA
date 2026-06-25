@@ -1,24 +1,50 @@
 # NOVA Language Specification
 
-### Current Version (v0.7)
+### Current Version (v0.8)
 
-This document describes the current stable syntax and language features supported by NOVA.
+This document describes the current stable version of NOVA.
 
-Historical specifications are available in the versioned documentation.
+The language syntax is defined by **NOVA v0.7**. Version **v0.8** expands the language by introducing the Standard Library without changing the language grammar.
+
+Historical specifications remain available in the versioned documentation.
 
 ---
 
 ## Language Versions
 
-| Version |           Specification       |
-| ------- | ----------------------------- |
-| v0.7    | [NOVA v0.7 Syntax](v0.7.md)   |
-| v0.6    | [NOVA v0.6 Syntax](v0.6.md)   |
-| v0.5    | [NOVA v0.5 Syntax](v0.5.md)   |
-| v0.4    | [NOVA v0.4 Syntax](v0.4.md)   |
-| v0.3    | [NOVA v0.3 Syntax](v0.3.md)   |
-| v0.2    | [NOVA v0.2 Syntax](v0.2.md)   |
-| v0.1    | [NOVA v0.1 Syntax](v0.1.md)   |
+| Version            | Documentation               |
+| ------------------ | --------------------------- |
+| **Current (v0.8)** | This document               |
+| v0.7               | [NOVA v0.7 Syntax](v0.7.md) |
+| v0.6               | [NOVA v0.6 Syntax](v0.6.md) |
+| v0.5               | [NOVA v0.5 Syntax](v0.5.md) |
+| v0.4               | [NOVA v0.4 Syntax](v0.4.md) |
+| v0.3               | [NOVA v0.3 Syntax](v0.3.md) |
+| v0.2               | [NOVA v0.2 Syntax](v0.2.md) |
+| v0.1               | [NOVA v0.1 Syntax](v0.1.md) |
+
+---
+
+## Language Syntax
+
+The current NOVA syntax is defined by:
+
+* [NOVA v0.7 Language Specification](v0.7.md)
+
+---
+
+## Standard Library
+
+NOVA v0.8 introduces the first official Standard Library.
+
+Documentation:
+
+* [Standard Library Index](../stdlib/_INDEX_.md)
+* [Input Functions](../stdlib/input.md)
+* [Type Conversion Functions](../stdlib/conversions.md)
+* [String Functions](../stdlib/string.md)
+* [Array Functions](../stdlib/array.md)
+* [Mathematical Functions](../stdlib/math.md)
 
 ---
 
@@ -31,16 +57,12 @@ Historical specifications are available in the versioned documentation.
 * Booleans (`B`)
 * Any (`U`)
 
----
-
 ### Variables
 
 * Mutable variables
 * Immutable constants
 * Deferred initialization
 * Runtime datatype validation
-
----
 
 ### Expressions
 
@@ -52,8 +74,6 @@ Historical specifications are available in the versioned documentation.
 * Parenthesized expressions
 * Ternary expressions
 
----
-
 ### Collections
 
 * Arrays
@@ -62,8 +82,6 @@ Historical specifications are available in the versioned documentation.
 * Nested arrays
 * Array indexing
 * Array mutation
-
----
 
 ### Schema Maps
 
@@ -76,8 +94,6 @@ Historical specifications are available in the versioned documentation.
 * Property mutation
 * Runtime schema validation
 
----
-
 ### Control Flow
 
 * `if`
@@ -85,8 +101,6 @@ Historical specifications are available in the versioned documentation.
 * `else if`
 * Block scope
 * Variable shadowing
-
----
 
 ### Loops
 
@@ -100,8 +114,6 @@ Historical specifications are available in the versioned documentation.
 * `break`
 * `continue`
 
----
-
 ### Functions
 
 * Function declarations
@@ -114,24 +126,19 @@ Historical specifications are available in the versioned documentation.
 * Local function scope
 * Recursive functions
 
----
+### Standard Library
 
-### Built-in Functions
-
-See the Standard Library documentation:
-
-* [Index](../stdlib/_INDEX_.md) `../stdlib/_INDEX_.md`
-* [Input Functions](../stdlib//input.md) `../stdlib/input.md`
-* [Type Conversion Functions](../stdlib/conversions.md) `../stdlib/conversions.md`
-* [String Functions](../stdlib/string.md) `../stdlib/string.md`
-* [Array Functions](../stdlib/array.md) `../stdlib/array.md`
-* [Mathematical Functions](../stdlib/math.md) `../stdlib/math.md`
+* Input functions
+* Type conversion functions
+* String functions
+* Array functions
+* Mathematical functions
 
 ---
 
 ## Examples
 
-Runnable examples for the language:
+Runnable examples:
 
 * [Examples](../../examples/)
 
@@ -141,19 +148,19 @@ Runnable examples for the language:
 
 Current release:
 
-* [Current Release](../releases/v0.7.0.md)
+* [NOVA v0.8.0 Release Notes](../releases/v0.8.0.md)
 * [Release Notes](../releases/)
 
 ---
 
 ## Historical Specifications
 
-Previous language specifications are preserved in the versioned documentation:
+Previous language specifications are preserved for historical reference.
 
-* [v0.1.md](v0.1.md)
-* [v0.2.md](v0.2.md)
-* [v0.3.md](v0.3.md)
-* [v0.4.md](v0.4.md)
-* [v0.5.md](v0.5.md)
-* [v0.6.md](v0.6.md)
-* [v0.7.md](v0.7.md)
+* [v0.1](v0.1.md)
+* [v0.2](v0.2.md)
+* [v0.3](v0.3.md)
+* [v0.4](v0.4.md)
+* [v0.5](v0.5.md)
+* [v0.6](v0.6.md)
+* [v0.7](v0.7.md)
