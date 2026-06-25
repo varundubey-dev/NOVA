@@ -4,6 +4,9 @@ from nova.ast import (
     Program,
     VariableDeclaration,
     ConstantDeclaration,
+    FunctionDeclaration,
+    Parameter,
+    ReturnStatement,
     Assignment,
     PrintStatement,
     Identifier,
@@ -17,6 +20,8 @@ from nova.ast import (
     ArrayAssignment,
     BinaryExpression,
     UnaryExpression,
+    TernaryExpression,
+    FunctionCall,
     SchemaDeclaration,
     SchemaType,
     SchemaField,
@@ -26,7 +31,6 @@ from nova.ast import (
     PropertyAssignment,
     IfStatement,
     BlockStatement,
-    TernaryExpression,
     WhileStatement,
     ForRangeStatement,
     ForEachStatement,
@@ -132,6 +136,12 @@ class Parser:
         if self.current_token.type == TokenType.CONTINUE:
             return self.parse_continue_statement()
 
+        if self.current_token.type == TokenType.FN:
+            return self.parse_function_declaration()
+
+        if self.current_token.type == TokenType.RETURN:
+            return self.parse_return_statement()
+
         if self.current_token.type == TokenType.IDENTIFIER:
             next_token = self.peek()
 
@@ -159,6 +169,9 @@ class Parser:
 
             if next_token.type == TokenType.EQUALS:
                 return self.parse_assignment()
+
+            if next_token.type == TokenType.LPAREN:
+                return self.parse_expression()
 
         raise UnexpectedTokenError(
             f"Unexpected token {self.current_token.type.name}.",
@@ -332,9 +345,58 @@ class Parser:
             self.skip_newlines()
 
     def parse_postfix_expression(self, expression):
-        while self.current_token is not None:
+        while True:
 
-            # Array access
+            self.skip_expression_newlines()
+
+            # -------------------------
+            # Function Call
+            # -------------------------
+
+            if self.current_token.type == TokenType.LPAREN:
+                line = self.current_token.line
+                column = self.current_token.column
+
+                self.advance()
+
+                arguments = []
+
+                self.paren_depth += 1
+
+                try:
+                    self.skip_newlines()
+
+                    if self.current_token.type != TokenType.RPAREN:
+                        while True:
+                            arguments.append(self.parse_expression())
+
+                            self.skip_newlines()
+
+                            if self.current_token.type != TokenType.COMMA:
+                                break
+
+                            self.advance()
+
+                            self.skip_newlines()
+
+                    self.consume(TokenType.RPAREN)
+
+                finally:
+                    self.paren_depth -= 1
+
+                expression = FunctionCall(
+                    callee=expression,
+                    arguments=arguments,
+                    line=line,
+                    column=column,
+                )
+
+                continue
+
+            # -------------------------
+            # Array Access
+            # -------------------------
+
             if self.current_token.type == TokenType.LBRACKET:
                 self.advance()
 
@@ -351,15 +413,18 @@ class Parser:
 
                 continue
 
-            # Property access
+            # -------------------------
+            # Property Access
+            # -------------------------
+
             if self.current_token.type == TokenType.DOT:
                 self.advance()
 
-                property_token = self.consume(TokenType.IDENTIFIER)
+                property_name = self.consume(TokenType.IDENTIFIER)
 
                 expression = PropertyAccess(
                     target=expression,
-                    property_name=property_token.value,
+                    property_name=property_name.value,
                     line=expression.line,
                     column=expression.column,
                 )
@@ -1199,6 +1264,97 @@ class Parser:
         token = self.consume(TokenType.CONTINUE)
 
         return ContinueStatement(
+            line=token.line,
+            column=token.column,
+        )
+
+    def parse_function_declaration(self):
+        fn_token = self.consume(TokenType.FN)
+
+        name = self.consume(TokenType.IDENTIFIER)
+
+        self.consume(TokenType.LPAREN)
+
+        parameters = []
+
+        self.skip_newlines()
+
+        if self.current_token is None:
+            raise UnexpectedEOFError(
+                "Unexpected EOF while parsing parameters.",
+                fn_token.line,
+                fn_token.column,
+            )
+
+        if self.current_token.type != TokenType.RPAREN:
+            while True:
+                parameter_name = self.consume(TokenType.IDENTIFIER)
+
+                self.consume(TokenType.COLON)
+
+                parameter_type = self.parse_type()
+
+                parameters.append(
+                    Parameter(
+                        name=parameter_name.value,
+                        parameter_type=parameter_type,
+                        line=parameter_name.line,
+                        column=parameter_name.column,
+                    )
+                )
+
+                self.skip_newlines()
+
+                if self.current_token.type != TokenType.COMMA:
+                    break
+
+                self.advance()
+
+                self.skip_newlines()
+
+        self.consume(TokenType.RPAREN)
+
+        return_type = None
+
+        if (
+            self.current_token is not None
+            and self.current_token.type == TokenType.ARROW
+        ):
+            self.advance()
+
+            return_type = self.parse_type()
+
+        self.skip_newlines()
+
+        body = self.parse_block_statement()
+
+        return FunctionDeclaration(
+            name=name.value,
+            parameters=parameters,
+            body=body,
+            return_type=return_type,
+            line=fn_token.line,
+            column=fn_token.column,
+        )
+
+    def parse_return_statement(self):
+        token = self.consume(TokenType.RETURN)
+
+        if self.current_token is None or self.current_token.type in (
+            TokenType.NEWLINE,
+            TokenType.RBRACE,
+            TokenType.EOF,
+        ):
+            return ReturnStatement(
+                value=None,
+                line=token.line,
+                column=token.column,
+            )
+
+        value = self.parse_expression()
+
+        return ReturnStatement(
+            value=value,
             line=token.line,
             column=token.column,
         )
