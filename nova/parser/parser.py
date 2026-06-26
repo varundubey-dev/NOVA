@@ -188,7 +188,7 @@ class Parser:
             if next_token.type == TokenType.EQUALS:
                 return self.parse_assignment()
 
-            if next_token.type == TokenType.LPAREN:
+            if next_token.type in (TokenType.LPAREN, TokenType.DOT):
                 return self.parse_expression()
 
         raise UnexpectedTokenError(

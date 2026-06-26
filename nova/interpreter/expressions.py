@@ -9,6 +9,7 @@ from nova.interpreter.runtime_values import (
     NullValue,
     ArrayValue,
     MapValue,
+    FunctionValue,
 )
 
 from nova.errors import (
@@ -19,6 +20,11 @@ from nova.errors import (
     StackOverflowError,
     FunctionArgumentCountError,
     MissingReturnError,
+    UndeclaredVariableError,
+)
+
+from nova.ast import (
+    Identifier,
 )
 
 
@@ -41,8 +47,28 @@ class ExpressionInterpreter(StatementInterpreter):
         return NullValue()
 
     def visit_identifier(self, node):
-        return self.environment.get_variable(
-            node.name,
+        try:
+            return self.environment.get_variable(
+                node.name,
+                node.line,
+                node.column,
+            )
+
+        except UndeclaredVariableError:
+            pass
+
+        try:
+            return self.environment.get_module(
+                node.name,
+                node.line,
+                node.column,
+            )
+
+        except UndeclaredVariableError:
+            pass
+
+        raise UndeclaredVariableError(
+            f"'{node.name}' is not declared.",
             node.line,
             node.column,
         )
@@ -56,14 +82,35 @@ class ExpressionInterpreter(StatementInterpreter):
         # Built-in Functions
         # -------------------------
 
-        builtin = BUILTINS.get(node.callee.name)
+        if isinstance(node.callee, Identifier):
+            builtin = BUILTINS.get(node.callee.name)
 
-        if builtin is not None:
-            return builtin(
-                self,
-                argument_nodes,
-                arguments,
-                node,
+            if builtin is not None:
+                return builtin(
+                    self,
+                    argument_nodes,
+                    arguments,
+                    node,
+                )
+
+        # -------------------------
+        # Resolve Function
+        # -------------------------
+
+        if isinstance(node.callee, Identifier):
+            function = self.environment.get_function(
+                node.callee.name,
+                node.line,
+                node.column,
+            )
+        else:
+            function = self.visit(node.callee)
+
+        if not isinstance(function, FunctionValue):
+            raise InvalidOperandError(
+                "Target is not callable.",
+                node.line,
+                node.column,
             )
 
         # -------------------------
@@ -80,12 +127,6 @@ class ExpressionInterpreter(StatementInterpreter):
                     node.column,
                 )
 
-            function = self.environment.get_function(
-                node.callee.name,
-                node.line,
-                node.column,
-            )
-
             if len(arguments) != len(function.parameters):
                 raise FunctionArgumentCountError(
                     f"Function '{function.name}' expects "
@@ -96,7 +137,11 @@ class ExpressionInterpreter(StatementInterpreter):
                 )
 
             previous_environment = self.environment
-            self.environment = previous_environment.create_child()
+
+            # IMPORTANT:
+            # Execute inside the function's declaration environment,
+            # not the caller's environment.
+            self.environment = function.closure.create_child()
 
             try:
                 for parameter, argument in zip(
@@ -107,8 +152,8 @@ class ExpressionInterpreter(StatementInterpreter):
                         parameter.name,
                         parameter.parameter_type,
                         argument,
-                        node.line,
-                        node.column,
+                        line=node.line,
+                        column=node.column,
                     )
 
                 try:

@@ -58,3 +58,18 @@ class MissingReturnError(RuntimeError):
 
 class FunctionArgumentTypeError(RuntimeError):
     pass
+
+class ModuleNotFoundError(RuntimeError):
+    pass
+
+class CircularImportError(RuntimeError):
+    pass
+
+class ModuleExportError(RuntimeError):
+    pass
+
+class UndeclaredModuleError(RuntimeError):
+    pass
+
+class IdentifierNotExported(RuntimeError):
+    pass

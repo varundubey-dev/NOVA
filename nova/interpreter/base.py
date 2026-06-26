@@ -31,6 +31,7 @@ from nova.ast import (
     FunctionDeclaration,
     FunctionCall,
     ReturnStatement,
+    ImportStatement
 )
 
 
@@ -38,12 +39,15 @@ class InterpreterBase:
     def __init__(
         self,
         input_provider=None,
+        resolver=None,
     ):
         self.environment = Environment()
 
         self.output = []
 
         self.input_provider = input_provider if input_provider is not None else input
+
+        self.resolver = resolver
 
         self.loop_depth = 0
 
@@ -71,6 +75,9 @@ class InterpreterBase:
 
         if isinstance(node, PropertyAssignment):
             return self.visit_property_assignment(node)
+        
+        if isinstance(node, ImportStatement):
+            return self.visit_import_statement(node)
 
         if isinstance(node, PrintStatement):
             return self.visit_print_statement(node)
@@ -172,6 +179,9 @@ class InterpreterBase:
         raise NotImplementedError
 
     def visit_property_assignment(self, node):
+        raise NotImplementedError
+    
+    def visit_import_statement(self, node):
         raise NotImplementedError
 
     def visit_print_statement(self, node):

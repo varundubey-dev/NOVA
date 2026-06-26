@@ -26,6 +26,13 @@ class Environment:
         self.variables = {}
         self.schemas = {}
         self.functions = {}
+        self.modules = {}
+
+        self.exports = {
+            "variables": {},
+            "schemas": {},
+            "functions": {},
+        }
 
     def resolve_variable(
         self,
@@ -240,8 +247,14 @@ class Environment:
         value=None,
         line=None,
         column=None,
+        exported=False,
     ):
-        if name in self.variables or name in self.schemas or name in self.functions:
+        if (
+            name in self.variables
+            or name in self.schemas
+            or name in self.functions
+            or name in self.modules
+        ):
             raise DuplicateDeclarationError(
                 f"Variable '{name}' already declared.",
                 line,
@@ -262,14 +275,23 @@ class Environment:
             "constant": False,
         }
 
+        if exported:
+            self.exports["variables"][name] = self.variables[name]
+
     def declare_function(
         self,
         name,
         function,
         line=None,
         column=None,
+        exported=False,
     ):
-        if name in self.variables or name in self.schemas or name in self.functions:
+        if (
+            name in self.variables
+            or name in self.schemas
+            or name in self.functions
+            or name in self.modules
+        ):
             raise DuplicateDeclarationError(
                 f"Function '{name}' already declared.",
                 line,
@@ -277,6 +299,8 @@ class Environment:
             )
 
         self.functions[name] = function
+        if exported:
+            self.exports["functions"][name] = function
 
     def declare_schema(
         self,
@@ -284,8 +308,14 @@ class Environment:
         schema,
         line=None,
         column=None,
+        exported=False,
     ):
-        if name in self.schemas or name in self.variables or name in self.functions:
+        if (
+            name in self.schemas
+            or name in self.variables
+            or name in self.functions
+            or name in self.modules
+        ):
             raise DuplicateDeclarationError(
                 f"Schema '{name}' already declared.",
                 line,
@@ -293,6 +323,8 @@ class Environment:
             )
 
         self.schemas[name] = schema
+        if exported:
+            self.exports["schemas"][name] = schema
 
     def declare_constant(
         self,
@@ -301,8 +333,14 @@ class Environment:
         value=None,
         line=None,
         column=None,
+        exported=False,
     ):
-        if name in self.variables or name in self.schemas or name in self.functions:
+        if (
+            name in self.variables
+            or name in self.schemas
+            or name in self.functions
+            or name in self.modules
+        ):
             raise DuplicateDeclarationError(
                 f"Variable '{name}' already declared.",
                 line,
@@ -322,6 +360,29 @@ class Environment:
             "initialized": value is not None,
             "constant": True,
         }
+        if exported:
+            self.exports["variables"][name] = self.variables[name]
+
+    def declare_module(
+        self,
+        name,
+        module,
+        line=None,
+        column=None,
+    ):
+        if (
+            name in self.variables
+            or name in self.functions
+            or name in self.schemas
+            or name in self.modules
+        ):
+            raise DuplicateDeclarationError(
+                f"Module '{name}' already declared.",
+                line,
+                column,
+            )
+
+        self.modules[name] = module
 
     def assign_variable(
         self,
@@ -417,6 +478,29 @@ class Environment:
 
         raise UndeclaredFunctionError(
             f"Function '{name}' is not declared.",
+            line,
+            column,
+        )
+
+    def get_exports(self):
+        return self.exports
+
+    def get_module(
+        self,
+        name,
+        line=None,
+        column=None,
+    ):
+        env = self
+
+        while env is not None:
+            if name in env.modules:
+                return env.modules[name]
+
+            env = env.parent
+
+        raise UndeclaredVariableError(
+            f"Module '{name}' is not declared.",
             line,
             column,
         )

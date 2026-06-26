@@ -18,6 +18,7 @@ from nova.errors import (
     InvalidRangeError,
     NotIterableError,
     InvalidLoopControlError,
+    IdentifierNotExported,
 )
 
 
@@ -47,8 +48,9 @@ class StatementInterpreter(InterpreterBase):
             node.name,
             node.var_type,
             value,
-            node.line,
-            node.column,
+            line=node.line,
+            column=node.column,
+            exported=node.exported,
         )
 
         return value
@@ -63,8 +65,9 @@ class StatementInterpreter(InterpreterBase):
             node.name,
             node.const_type,
             value,
-            node.line,
-            node.column,
+            line=node.line,
+            column=node.column,
+            exported=node.exported,
         )
 
         return value
@@ -73,25 +76,28 @@ class StatementInterpreter(InterpreterBase):
         self.environment.declare_schema(
             node.name,
             node.schema,
-            node.line,
-            node.column,
+            line=node.line,
+            column=node.column,
+            exported=node.exported,
         )
 
         return None
-    
+
     def visit_function_declaration(self, node):
         function = FunctionValue(
             name=node.name,
             parameters=node.parameters,
             body=node.body,
             return_type=node.return_type,
+            closure=self.environment,
         )
 
         self.environment.declare_function(
             node.name,
             function,
-            node.line,
-            node.column,
+            line=node.line,
+            column=node.column,
+            exported=node.exported,
         )
 
         return None
@@ -319,3 +325,68 @@ class StatementInterpreter(InterpreterBase):
             value = self.visit(node.value)
 
         raise ReturnSignal(value)
+
+    def visit_import_statement(self, node):
+        if self.resolver is None:
+            raise RuntimeError("Resolver is none")
+        
+        module = self.resolver.resolve(node.module_path)
+
+        # import math
+        if node.imports is None:
+            name = node.alias if node.alias is not None else node.module_path[-1]
+
+            self.environment.declare_module(
+                name,
+                module,
+                node.line,
+                node.column,
+            )
+
+            return None
+
+        # import foo from math
+
+        for item in node.imports:
+            export_name = item.name
+
+            imported_name = item.alias if item.alias is not None else item.name
+
+            if export_name in module.exports["variables"]:
+                info = module.exports["variables"][export_name]
+
+                self.environment.declare_variable(
+                    imported_name,
+                    info["type"],
+                    info["value"],
+                    line=node.line,
+                    column=node.column,
+                )
+
+                continue
+
+            if export_name in module.exports["functions"]:
+                self.environment.declare_function(
+                    imported_name,
+                    module.exports["functions"][export_name],
+                    line=node.line,
+                    column=node.column,
+                )
+
+                continue
+
+            if export_name in module.exports["schemas"]:
+                self.environment.declare_schema(
+                    imported_name,
+                    module.exports["schemas"][export_name],
+                    line=node.line,
+                    column=node.column,
+                )
+
+                continue
+
+            raise IdentifierNotExported(
+                f"'{export_name}' is not exported by module '{module.name}'."
+            )
+
+        return None

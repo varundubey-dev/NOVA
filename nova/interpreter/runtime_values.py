@@ -55,7 +55,7 @@ class MapValue(RuntimeValue):
 
 
 class FunctionValue(RuntimeValue):
-    def __init__(self, name, parameters, body, return_type):
+    def __init__(self, name, parameters, body, return_type, closure):
         super().__init__(None)
 
         self.name = name
@@ -63,5 +63,35 @@ class FunctionValue(RuntimeValue):
         self.body = body
         self.return_type = return_type
 
+        # Environment where the function was declared.
+        self.closure = closure
+
     def __repr__(self):
-        return f"FunctionValue({self.name})"
+        return f"FunctionValue(" f"{self.name}" f")"
+
+
+class ModuleValue(RuntimeValue):
+    def __init__(
+        self,
+        name,
+        exports,
+        path=None,
+        is_stdlib=False,
+    ):
+        super().__init__(exports)
+
+        self.name = name
+        self.path = path
+        self.is_stdlib = is_stdlib
+
+    @property
+    def exports(self):
+        return self.value
+
+    def __repr__(self):
+        return (
+            f"ModuleValue("
+            f"name={self.name!r}, "
+            f"exports={list(self.exports.keys())}"
+            f")"
+        )

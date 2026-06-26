@@ -5,6 +5,7 @@ from nova.interpreter.runtime_values import (
     NumberValue,
     ArrayValue,
     MapValue,
+    ModuleValue,
 )
 
 from nova.ast import Identifier, ArrayAccess, PropertyAccess, ArrayType
@@ -27,8 +28,9 @@ class CollectionInterpreter(TypeResolver, ExpressionInterpreter):
         self.environment.declare_schema(
             node.name,
             node.schema,
-            node.line,
-            node.column,
+            line=node.line,
+            column=node.column,
+            exported=node.exported,
         )
 
         return None
@@ -58,21 +60,47 @@ class CollectionInterpreter(TypeResolver, ExpressionInterpreter):
     def visit_property_access(self, node):
         target = self.visit(node.target)
 
-        if not isinstance(target, MapValue):
+        # -------------------------
+        # Module Access
+        # -------------------------
+
+        if isinstance(target, ModuleValue):
+
+            if node.property_name in target.exports["variables"]:
+                return target.exports["variables"][node.property_name]["value"]
+
+            if node.property_name in target.exports["functions"]:
+                return target.exports["functions"][node.property_name]
+
+            if node.property_name in target.exports["schemas"]:
+                return target.exports["schemas"][node.property_name]
+
             raise InvalidOperandError(
-                "Cannot access property on non-map value.",
+                f"Module '{target.name}' has no exported member '{node.property_name}'.",
                 node.line,
                 node.column,
             )
 
-        if node.property_name not in target.value:
-            raise InvalidOperandError(
-                f"Unknown property '{node.property_name}'.",
-                node.line,
-                node.column,
-            )
+        # -------------------------
+        # Map Access
+        # -------------------------
 
-        return target.value[node.property_name]
+        if isinstance(target, MapValue):
+
+            if node.property_name not in target.value:
+                raise InvalidOperandError(
+                    f"Unknown property '{node.property_name}'.",
+                    node.line,
+                    node.column,
+                )
+
+            return target.value[node.property_name]
+
+        raise InvalidOperandError(
+            "Cannot access property on this value.",
+            node.line,
+            node.column,
+        )
 
     # Array Access
 

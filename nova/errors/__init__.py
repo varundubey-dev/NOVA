@@ -33,6 +33,11 @@ from nova.errors.runtime_errors import (
     FunctionArgumentCountError,
     MissingReturnError,
     FunctionArgumentTypeError,
+    ModuleNotFoundError,
+    CircularImportError,
+    ModuleExportError,
+    UndeclaredModuleError,
+    IdentifierNotExported,
 )
 
 from nova.errors.type_errors import (
@@ -72,6 +77,11 @@ __all__ = [
     "FunctionArgumentCountError",
     "MissingReturnError",
     "FunctionArgumentTypeError",
+    "ModuleNotFoundError",
+    "CircularImportError",
+    "ModuleExportError",
+    "UndeclaredModuleError",
+    "IdentifierNotExported",
     "TypeError",
     "DatatypeMismatchError",
     "InvalidOperandError",

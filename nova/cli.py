@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from nova.api import run_file
 
@@ -73,8 +74,13 @@ def main():
 
     path = sys.argv[1]
 
+    project_root = Path(path).resolve().parent
+
     try:
-        _, output = run_file(path)
+        _, output = run_file(
+            path,
+            project_root=project_root,
+        )
 
         for line in output:
             print(line)
