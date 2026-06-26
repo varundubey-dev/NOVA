@@ -37,6 +37,8 @@ from nova.ast import (
     ForEachStatement,
     BreakStatement,
     ContinueStatement,
+    ImportStatement,
+    ImportItem,
 )
 
 from nova.errors import (
@@ -151,6 +153,12 @@ class Parser:
 
         if self.current_token.type == TokenType.RETURN:
             return self.parse_return_statement()
+
+        if self.current_token.type == TokenType.IMPORT:
+            return self.parse_import_statement()
+
+        if self.current_token.type == TokenType.EXPORT:
+            return self.parse_export_statement()
 
         if self.current_token.type == TokenType.IDENTIFIER:
             next_token = self.peek()
@@ -285,14 +293,16 @@ class Parser:
         while True:
             element_types.append(self.parse_type())
 
+            if self.current_token is None or self.current_token.type != TokenType.COMMA:
+                break
+
+            self.advance()
+
             if (
                 self.current_token is not None
-                and self.current_token.type == TokenType.COMMA
+                and self.current_token.type == TokenType.RBRACKET
             ):
-                self.advance()
-                continue
-
-            break
+                break
 
         self.consume(TokenType.RBRACKET)
 
@@ -332,6 +342,13 @@ class Parser:
                 self.advance()
 
                 self.skip_newlines()
+
+                # Allow trailing comma
+                if (
+                    self.current_token is not None
+                    and self.current_token.type == TokenType.RBRACKET
+                ):
+                    break
 
                 continue
 
@@ -998,6 +1015,16 @@ class Parser:
                 and self.current_token.type == TokenType.COMMA
             ):
                 self.advance()
+
+                self.skip_newlines()
+
+                # Allow trailing comma
+                if (
+                    self.current_token is not None
+                    and self.current_token.type == TokenType.RBRACE
+                ):
+                    break
+
                 continue
 
             break
@@ -1056,6 +1083,16 @@ class Parser:
                 and self.current_token.type == TokenType.COMMA
             ):
                 self.advance()
+
+                self.skip_newlines()
+
+                # Allow trailing comma
+                if (
+                    self.current_token is not None
+                    and self.current_token.type == TokenType.RBRACE
+                ):
+                    break
+
                 continue
 
             break
@@ -1330,43 +1367,59 @@ class Parser:
 
         parameters = []
 
-        self.skip_newlines()
+        self.paren_depth += 1
 
-        if self.current_token is None:
-            raise UnexpectedEOFError(
-                "Unexpected EOF while parsing parameters.",
-                fn_token.line,
-                fn_token.column,
-            )
+        try:
+            self.skip_newlines()
 
-        if self.current_token.type != TokenType.RPAREN:
-            while True:
-                parameter_name = self.consume(TokenType.IDENTIFIER)
-                self.ensure_identifier_available(parameter_name)
-
-                self.consume(TokenType.COLON)
-
-                parameter_type = self.parse_type()
-
-                parameters.append(
-                    Parameter(
-                        name=parameter_name.value,
-                        parameter_type=parameter_type,
-                        line=parameter_name.line,
-                        column=parameter_name.column,
-                    )
+            if self.current_token is None:
+                raise UnexpectedEOFError(
+                    "Unexpected EOF while parsing parameters.",
+                    fn_token.line,
+                    fn_token.column,
                 )
 
-                self.skip_newlines()
+            if self.current_token.type != TokenType.RPAREN:
+                while True:
+                    parameter_name = self.consume(TokenType.IDENTIFIER)
+                    self.ensure_identifier_available(parameter_name)
 
-                if self.current_token.type != TokenType.COMMA:
-                    break
+                    self.consume(TokenType.COLON)
 
-                self.advance()
+                    parameter_type = self.parse_type()
 
-                self.skip_newlines()
+                    parameters.append(
+                        Parameter(
+                            name=parameter_name.value,
+                            parameter_type=parameter_type,
+                            line=parameter_name.line,
+                            column=parameter_name.column,
+                        )
+                    )
 
-        self.consume(TokenType.RPAREN)
+                    self.skip_newlines()
+
+                    if (
+                        self.current_token is None
+                        or self.current_token.type != TokenType.COMMA
+                    ):
+                        break
+
+                    self.advance()
+
+                    self.skip_newlines()
+
+                    # Allow trailing comma
+                    if (
+                        self.current_token is not None
+                        and self.current_token.type == TokenType.RPAREN
+                    ):
+                        break
+
+            self.consume(TokenType.RPAREN)
+
+        finally:
+            self.paren_depth -= 1
 
         return_type = None
 
@@ -1412,3 +1465,181 @@ class Parser:
             line=token.line,
             column=token.column,
         )
+
+    def parse_module_path(self):
+        parts = []
+
+        identifier = self.consume(TokenType.IDENTIFIER)
+        parts.append(identifier.value)
+
+        while (
+            self.current_token is not None and self.current_token.type == TokenType.DOT
+        ):
+            self.advance()
+
+            identifier = self.consume(TokenType.IDENTIFIER)
+            parts.append(identifier.value)
+
+        return parts
+
+    def parse_import_items(self):
+        items = []
+
+        while True:
+            identifier = self.consume(TokenType.IDENTIFIER)
+            self.ensure_identifier_available(identifier)
+
+            alias = None
+
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.AS
+            ):
+                self.advance()
+
+                alias_token = self.consume(TokenType.IDENTIFIER)
+                self.ensure_identifier_available(alias_token)
+
+                alias = alias_token.value
+
+            items.append(
+                ImportItem(
+                    name=identifier.value,
+                    alias=alias,
+                    line=identifier.line,
+                    column=identifier.column,
+                )
+            )
+
+            if self.current_token is None or self.current_token.type != TokenType.COMMA:
+                break
+
+            self.advance()
+
+            self.skip_newlines()
+
+            # Allow trailing comma before ')'
+            if (
+                self.current_token is not None
+                and self.current_token.type == TokenType.RPAREN
+            ):
+                break
+
+        return items
+
+    def parse_import_statement(self):
+        import_token = self.consume(TokenType.IMPORT)
+
+        # ----------------------------------
+        # Parenthesized selective imports
+        # ----------------------------------
+
+        if (
+            self.current_token is not None
+            and self.current_token.type == TokenType.LPAREN
+        ):
+            self.advance()
+
+            self.paren_depth += 1
+
+            try:
+                self.skip_newlines()
+
+                if (
+                    self.current_token is not None
+                    and self.current_token.type == TokenType.RPAREN
+                ):
+                    raise UnexpectedTokenError(
+                        "Import list cannot be empty.",
+                        self.current_token.line,
+                        self.current_token.column,
+                    )
+
+                imports = self.parse_import_items()
+
+                self.skip_newlines()
+
+                self.consume(TokenType.RPAREN)
+
+            finally:
+                self.paren_depth -= 1
+
+            self.consume(TokenType.FROM)
+
+            module_path = self.parse_module_path()
+
+            return ImportStatement(
+                module_path=module_path,
+                imports=imports,
+                line=import_token.line,
+                column=import_token.column,
+            )
+
+        # ----------------------------------
+        # Decide import kind
+        # ----------------------------------
+
+        if self.is_selective_import():
+
+            imports = self.parse_import_items()
+
+            self.consume(TokenType.FROM)
+
+            module_path = self.parse_module_path()
+
+            return ImportStatement(
+                module_path=module_path,
+                imports=imports,
+                line=import_token.line,
+                column=import_token.column,
+            )
+
+        # ----------------------------------
+        # Module import
+        # ----------------------------------
+
+        module_path = self.parse_module_path()
+
+        alias = None
+
+        if self.current_token is not None and self.current_token.type == TokenType.AS:
+            self.advance()
+
+            alias_token = self.consume(TokenType.IDENTIFIER)
+            self.ensure_identifier_available(alias_token)
+
+            alias = alias_token.value
+
+        return ImportStatement(
+            module_path=module_path,
+            alias=alias,
+            line=import_token.line,
+            column=import_token.column,
+        )
+
+    def is_selective_import(self):
+        pos = self.position
+
+        paren_depth = 0
+
+        while pos < len(self.tokens):
+            token = self.tokens[pos]
+
+            if token.type == TokenType.LPAREN:
+                paren_depth += 1
+
+            elif token.type == TokenType.RPAREN:
+                paren_depth -= 1
+
+            elif token.type == TokenType.NEWLINE and paren_depth == 0:
+                return False
+
+            elif token.type == TokenType.FROM:
+                return True
+
+            elif token.type == TokenType.EOF:
+                return False
+
+            pos += 1
+
+        return False

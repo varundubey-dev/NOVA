@@ -24,6 +24,7 @@ from .statements import (
     BreakStatement,
     ContinueStatement,
     ImportStatement,
+    ImportItem,
 )
 
 from .expressions import (
@@ -76,6 +77,7 @@ __all__ = [
     "BreakStatement",
     "ContinueStatement",
     "ImportStatement",
+    "ImportItem",
     # Expressions
     "Identifier",
     "ArrayAccess",
