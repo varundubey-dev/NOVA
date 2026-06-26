@@ -101,7 +101,7 @@ class Parser:
     def ensure_identifier_available(self, token):
         if token.value in RESERVED_IDENTIFIERS:
             raise ReservedIdentifierError(
-                f"'{token.value}' is a reserved built-in function name.",
+                f"'{token.value}' is a reserved identifier.",
                 token.line,
                 token.column,
             )
@@ -1643,3 +1643,53 @@ class Parser:
             pos += 1
 
         return False
+
+    def parse_export_statement(self):
+        export_token = self.consume(TokenType.EXPORT)
+
+        if self.current_token is None:
+            raise UnexpectedEOFError(
+                "Unexpected EOF after export.",
+                export_token.line,
+                export_token.column,
+            )
+
+        if self.current_token.type == TokenType.FN:
+            declaration = self.parse_function_declaration()
+
+        elif self.current_token.type == TokenType.IDENTIFIER:
+            next_token = self.peek()
+
+            if next_token is None:
+                raise UnexpectedEOFError(
+                    "Unexpected EOF after export.",
+                    self.current_token.line,
+                    self.current_token.column,
+                )
+
+            if next_token.type == TokenType.DOUBLE_COLON:
+                declaration = self.parse_constant_declaration()
+
+            elif next_token.type == TokenType.COLON:
+                if self.is_schema_declaration():
+                    declaration = self.parse_schema_declaration()
+                else:
+                    declaration = self.parse_variable_declaration()
+
+            else:
+                raise UnexpectedTokenError(
+                    "Expected variable, constant, schema, or function declaration after 'export'.",
+                    self.current_token.line,
+                    self.current_token.column,
+                )
+
+        else:
+            raise UnexpectedTokenError(
+                "Expected variable, constant, schema, or function declaration after 'export'.",
+                self.current_token.line,
+                self.current_token.column,
+            )
+
+        declaration.exported = True
+
+        return declaration
