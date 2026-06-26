@@ -1,0 +1,19 @@
+export fn sort(values: [U]) -> [U] {
+    return __sort(values)
+}
+
+export fn reverse(values: [U]) -> [U] {
+    return __reverse(values)
+}
+
+export fn unique(values: [U]) -> [U] {
+    return __unique(values)
+}
+
+export fn count(values: [U], value: U) -> N {
+    return __count(values, value)
+}
+
+export fn indexOf(values: [U], value: U) -> N {
+    return __indexOf(values, value)
+}

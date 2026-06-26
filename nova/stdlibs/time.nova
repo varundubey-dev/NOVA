@@ -1,0 +1,15 @@
+export fn now() -> S {
+    return __now()
+}
+
+export fn unix() -> N {
+    return __unix()
+}
+
+export fn timestamp() -> N {
+    return __timestamp()
+}
+
+export fn sleep(seconds: N) {
+    __sleep(seconds)
+}

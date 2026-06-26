@@ -77,13 +77,11 @@ def main():
     project_root = Path(path).resolve().parent
 
     try:
-        _, output = run_file(
+        run_file(
             path,
             project_root=project_root,
+            output_callback=print,
         )
-
-        for line in output:
-            print(line)
 
     except NovaError as error:
         with open(path, "r", encoding="utf-8") as file:

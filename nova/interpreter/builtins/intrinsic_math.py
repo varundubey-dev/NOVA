@@ -1,5 +1,4 @@
 import math
-import random
 
 from nova.interpreter.runtime_values import (
     NumberValue,
@@ -263,22 +262,4 @@ def builtin_ceil(
 
     return NumberValue(
         math.ceil(value.value)
-    )
-
-
-def builtin_random(
-    interpreter,
-    argument_nodes,
-    arguments,
-    node,
-):
-    if len(arguments) != 0:
-        raise FunctionArgumentCountError(
-            f"Function 'random' expects 0 arguments, got {len(arguments)}.",
-            node.line,
-            node.column,
-        )
-
-    return NumberValue(
-        random.random()
     )

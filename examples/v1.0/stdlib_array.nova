@@ -1,0 +1,271 @@
+import array
+
+// ======================================================
+// NOVA STANDARD LIBRARY ARRAY
+// ======================================================
+
+numbers: [N] = [
+    5,
+    2,
+    8,
+    2,
+    9,
+    5,
+    1
+]
+
+print(
+    "ORIGINAL",
+    numbers
+)
+
+// ======================================================
+// SORT
+// ======================================================
+
+print(
+    "SORT",
+    array.sort(numbers)
+)
+
+// ======================================================
+// REVERSE
+// ======================================================
+
+print(
+    "REVERSE",
+    array.reverse(numbers)
+)
+
+// ======================================================
+// UNIQUE
+// ======================================================
+
+duplicates: [N] = [
+    1,
+    2,
+    2,
+    3,
+    4,
+    4,
+    5,
+    5,
+    5
+]
+
+print(
+    "UNIQUE",
+    array.unique(duplicates)
+)
+
+// ======================================================
+// COUNT
+// ======================================================
+
+print(
+    "COUNT 5",
+    array.count(
+        duplicates,
+        5
+    )
+)
+
+print(
+    "COUNT 2",
+    array.count(
+        duplicates,
+        2
+    )
+)
+
+print(
+    "COUNT 10",
+    array.count(
+        duplicates,
+        10
+    )
+)
+
+// ======================================================
+// INDEX OF
+// ======================================================
+
+print(
+    "INDEX 8",
+    array.indexOf(
+        numbers,
+        8
+    )
+)
+
+print(
+    "INDEX 5",
+    array.indexOf(
+        numbers,
+        5
+    )
+)
+
+print(
+    "INDEX 100",
+    array.indexOf(
+        numbers,
+        100
+    )
+)
+
+// ======================================================
+// STRINGS
+// ======================================================
+
+words: [S] = [
+    "banana",
+    "apple",
+    "pear",
+    "apple"
+]
+
+print(
+    array.sort(words)
+)
+
+print(
+    array.reverse(words)
+)
+
+print(
+    array.unique(words)
+)
+
+print(
+    array.count(
+        words,
+        "apple"
+    )
+)
+
+print(
+    array.indexOf(
+        words,
+        "pear"
+    )
+)
+
+// ======================================================
+// MAP ARRAYS
+// ======================================================
+
+User: M = {
+    name: S,
+    age: N
+}
+
+users: [User] = [
+
+    {
+        name = "Alice",
+        age = 20
+    },
+
+    {
+        name = "Bob",
+        age = 18
+    }
+
+]
+
+print(
+    array.reverse(users)
+)
+
+// ======================================================
+// FUNCTION RETURN
+// ======================================================
+
+fn build() -> [N] {
+
+    values: [N] = [
+        9,
+        3,
+        6,
+        1,
+        5
+    ]
+
+    return array.sort(values)
+
+}
+
+print(
+    build()
+)
+
+// ======================================================
+// EXPRESSIONS
+// ======================================================
+
+print(
+
+    array.count(
+        duplicates,
+        5
+    ) + 10
+
+)
+
+print(
+
+    array.indexOf(
+        duplicates,
+        3
+    ) >= 0
+        ? "FOUND"
+        : "NOT FOUND"
+
+)
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+ORIGINAL [5, 2, 8, 2, 9, 5, 1]
+
+SORT [1, 2, 2, 5, 5, 8, 9]
+
+REVERSE [1, 5, 9, 2, 8, 2, 5]
+
+UNIQUE [1, 2, 3, 4, 5]
+
+COUNT 5 3
+
+COUNT 2 2
+
+COUNT 10 0
+
+INDEX 8 2
+
+INDEX 5 0
+
+INDEX 100 -1
+
+[apple, apple, banana, pear]
+
+[apple, pear, apple, banana]
+
+[banana, apple, pear]
+
+2
+
+2
+
+[{ name = Bob, age = 18 }, { name = Alice, age = 20 }]
+
+[1, 3, 5, 6, 9]
+
+13
+
+FOUND
+
+*/

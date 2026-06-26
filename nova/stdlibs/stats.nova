@@ -1,0 +1,19 @@
+export fn mean(values: [N]) -> N {
+    return __mean(values)
+}
+
+export fn median(values: [N]) -> N {
+    return __median(values)
+}
+
+export fn mode(values: [N]) -> N {
+    return __mode(values)
+}
+
+export fn variance(values: [N]) -> N {
+    return __variance(values)
+}
+
+export fn stddev(values: [N]) -> N {
+    return __stddev(values)
+}

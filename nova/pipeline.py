@@ -8,6 +8,7 @@ def create_interpreter(
     input_provider=None,
     resolver=None,
     is_stdlib=False,
+    output_callback=None,
 ):
     lexer = Lexer(source)
     tokens = lexer.tokenize()
@@ -19,6 +20,7 @@ def create_interpreter(
         input_provider=input_provider,
         resolver=resolver,
         is_stdlib=is_stdlib,
+        output_callback=output_callback,
     )
 
     interpreter.interpret(ast)

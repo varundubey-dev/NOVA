@@ -41,10 +41,13 @@ class InterpreterBase:
         input_provider=None,
         resolver=None,
         is_stdlib=False,
+        output_callback=None,
     ):
         self.environment = Environment()
 
         self.output = []
+
+        self.output_callback = output_callback
 
         self.input_provider = input_provider if input_provider is not None else input
 

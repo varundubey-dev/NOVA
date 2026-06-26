@@ -1,196 +1,86 @@
 # NOVA Language Specification
 
-### Current Version (v0.9)
+### Current Version (v1.0)
 
-This document describes the current stable version of NOVA.
+This document serves as the entry point for the current NOVA documentation.
 
-The language syntax is defined by **NOVA v0.9**, which introduces NOVA's first module system with imports, exports, and importable Standard Library modules.
+NOVA v1.0 is the current stable release of the language.
 
-Historical specifications remain available in the versioned documentation.
-
----
-
-## Language Versions
-
-| Version            | Documentation               |
-| ------------------ | --------------------------- |
-| **Current (v0.9)** | This document               |
-| v0.9               | [NOVA v0.9 Syntax](v0.9.md) |
-| v0.7               | [NOVA v0.7 Syntax](v0.7.md) |
-| v0.6               | [NOVA v0.6 Syntax](v0.6.md) |
-| v0.5               | [NOVA v0.5 Syntax](v0.5.md) |
-| v0.4               | [NOVA v0.4 Syntax](v0.4.md) |
-| v0.3               | [NOVA v0.3 Syntax](v0.3.md) |
-| v0.2               | [NOVA v0.2 Syntax](v0.2.md) |
-| v0.1               | [NOVA v0.1 Syntax](v0.1.md) |
+Unlike traditional language specifications, the NOVA language specification is **incremental**. Each versioned specification documents the language features introduced in that release while building upon all previous versions. Together, these documents define the complete language.
 
 ---
 
-## Language Syntax
+# Language Specification
 
-The current NOVA syntax is defined by:
+The complete NOVA language specification is distributed across the following documents.
 
-* [NOVA v0.9 Language Specification](v0.9.md)
+Read them in version order.
+
+| Version         | Features Introduced                                                 |
+| --------------- | ------------------------------------------------------------------- |
+| [v0.1](v0.1.md) | Core language, variables, arithmetic, output, comments              |
+| [v0.2](v0.2.md) | Booleans, constants, null, any type, comparisons, logical operators |
+| [v0.3](v0.3.md) | Arrays, typed arrays, nested arrays, array mutation                 |
+| [v0.4](v0.4.md) | Schema maps, map instances, property access, structured data        |
+| [v0.5](v0.5.md) | Conditionals, block scope, ternary expressions                      |
+| [v0.6](v0.6.md) | Loops, ranges, array iteration, break, continue                     |
+| [v0.7](v0.7.md) | User-defined functions, parameters, return values, recursion        |
+| [v0.9](v0.9.md) | Modules, imports, exports, Standard Library modules                 |
 
 ---
 
-## Built-in Functions
+# Built-in Functions
 
-NOVA provides globally available built-in functions for commonly used operations. These functions are available without imports.
+Built-in functions are globally available and do **not** require imports.
 
 Documentation:
 
 * [Built-in Functions Index](../builtins/_INDEX_.md)
-* [Input Functions](../builtins/input.md)
-* [Type Conversion Functions](../builtins/conversions.md)
-* [String Functions](../builtins/string.md)
 * [Array Functions](../builtins/array.md)
+* [String Functions](../builtins/string.md)
+* [Type Conversion Functions](../builtins/conversions.md)
+* [Input Functions](../builtins/input.md)
 
 ---
 
-## Standard Library
+# Standard Library
 
-The Standard Library provides importable modules that extend the core language.
+The Standard Library provides reusable modules that are imported explicitly.
 
-Current modules:
+Documentation:
 
 * [Standard Library Index](../stdlib/_INDEX_.md)
 * [Mathematics Module](../stdlib/math.md)
+* [Array Module](../stdlib/array.md)
+* [Random Module](../stdlib/random.md)
+* [Statistics Module](../stdlib/stats.md)
+* [Time Module](../stdlib/time.md)
 
 ---
 
-## Current Features
+# Examples
 
-### Primitive Types
-
-* Numbers (`N`)
-* Strings (`S`)
-* Booleans (`B`)
-* Any (`U`)
-
-### Variables
-
-* Mutable variables
-* Immutable constants
-* Deferred initialization
-* Runtime datatype validation
-
-### Expressions
-
-* Arithmetic
-* Comparison
-* Equality
-* Logical
-* Unary
-* Parenthesized expressions
-* Ternary expressions
-
-### Collections
-
-* Arrays
-* Typed arrays
-* Multi-type arrays
-* Nested arrays
-* Array indexing
-* Array mutation
-
-### Schema Maps
-
-* Schema declarations
-* Map instances
-* Optional properties
-* Nested schemas
-* Arrays of maps
-* Property access
-* Property mutation
-* Runtime schema validation
-
-### Control Flow
-
-* `if`
-* `else`
-* `else if`
-* Block scope
-* Variable shadowing
-
-### Loops
-
-* `while`
-* `for`
-* Exclusive ranges (`..`)
-* Inclusive ranges (`...`)
-* Descending ranges
-* Array iteration
-* Nested loops
-* `break`
-* `continue`
-
-### Functions
-
-* Function declarations
-* Function calls
-* Parameters
-* Return values
-* Return type enforcement
-* Early returns
-* Global scope access
-* Local function scope
-* Recursive functions
-
-### Built-in Functions
-
-* Input functions
-* Type conversion functions
-* String functions
-* Array functions
-
-### Modules
-
-* Module imports
-* Selective imports
-* Multiline imports
-* Module aliases
-* Exported variables
-* Exported constants
-* Exported functions
-* Exported schemas
-* Hierarchical module paths
-* Module resolution
-* Circular import detection
-
-### Standard Library
-
-* Importable modules
-* Mathematics module
-
----
-
-## Examples
-
-Runnable examples:
+Runnable example programs for every language release are available in:
 
 * [Examples](../../examples/)
 
 ---
 
-## Release Notes
+# Release Notes
 
-Current release:
+Release notes describe the evolution of NOVA across versions.
 
-* [NOVA v0.9.0 Release Notes](../releases/v0.9.0.md)
-* [Release Notes](../releases/)
+* [NOVA v1.0.0 Release Notes](../releases/v1.0.0.md)
+* [Changelog](../releases/_CHANGELOG_.md)
 
 ---
 
-## Historical Specifications
+# Documentation Structure
 
-Previous language specifications are preserved for historical reference.
-
-* [v0.1](v0.1.md)
-* [v0.2](v0.2.md)
-* [v0.3](v0.3.md)
-* [v0.4](v0.4.md)
-* [v0.5](v0.5.md)
-* [v0.6](v0.6.md)
-* [v0.7](v0.7.md)
-* [v0.9](v0.9.md)
+| Documentation          | Purpose                                    |
+| ---------------------- | ------------------------------------------ |
+| Language Specification | Incremental language syntax and grammar    |
+| Built-in Functions     | Global functions available without imports |
+| Standard Library       | Importable library modules                 |
+| Examples               | Runnable example programs                  |
+| Release Notes          | Version history and release summaries      |

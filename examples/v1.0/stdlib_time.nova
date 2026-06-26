@@ -1,0 +1,141 @@
+import time
+
+// ======================================================
+// NOVA STANDARD LIBRARY TIME
+// ======================================================
+
+print(
+    "NOW",
+    time.now()
+)
+
+print(
+    "UNIX",
+    time.unix()
+)
+
+print(
+    "TIMESTAMP",
+    time.timestamp()
+)
+
+// ======================================================
+// SLEEP
+// ======================================================
+
+print(
+    "WAITING..."
+)
+
+time.sleep(2)
+
+print(
+    "DONE"
+)
+
+// ======================================================
+// BEFORE / AFTER
+// ======================================================
+
+before: N = time.unix()
+
+time.sleep(1)
+
+after: N = time.unix()
+
+print(
+    "ELAPSED",
+    after - before
+)
+
+// ======================================================
+// FUNCTION
+// ======================================================
+
+fn logTime() {
+
+    print(
+        "CURRENT",
+        time.now()
+    )
+
+}
+
+logTime()
+
+// ======================================================
+// EXPRESSIONS
+// ======================================================
+
+print(
+
+    time.unix() >
+    0
+
+)
+
+print(
+
+    time.timestamp() >
+    0
+        ? "VALID"
+        : "INVALID"
+
+)
+
+// ======================================================
+// MULTIPLE CALLS
+// ======================================================
+
+print(
+    time.now()
+)
+
+print(
+    time.now()
+)
+
+print(
+    time.unix()
+)
+
+print(
+    time.timestamp()
+)
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+NOW 2026-06-26 14:35:20
+
+UNIX 1782477320
+
+TIMESTAMP 1782477320.483291
+
+WAITING...
+
+DONE
+
+ELAPSED 1
+
+CURRENT 2026-06-26 14:35:23
+
+true
+
+VALID
+
+2026-06-26 14:35:23
+
+2026-06-26 14:35:23
+
+1782477323
+
+1782477323.501029
+
+The exact dates and numeric values will differ depending on the
+current system time and execution environment.
+
+*/

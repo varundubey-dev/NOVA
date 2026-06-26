@@ -31,7 +31,3 @@ export fn floor(value: N) -> N {
 export fn ceil(value: N) -> N {
     return __ceil(value)
 }
-
-export fn random() -> N {
-    return __random()
-}

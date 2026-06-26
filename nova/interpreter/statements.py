@@ -118,7 +118,12 @@ class StatementInterpreter(InterpreterBase):
     def visit_print_statement(self, node):
         values = [self.visit(expression) for expression in node.expressions]
 
-        self.output.append(" ".join(self.format_value(value) for value in values))
+        text = " ".join(self.format_value(value) for value in values)
+
+        self.output.append(text)
+
+        if self.output_callback is not None:
+            self.output_callback(text)
 
         return None
 
@@ -330,7 +335,7 @@ class StatementInterpreter(InterpreterBase):
     def visit_import_statement(self, node):
         if self.resolver is None:
             raise RuntimeError("Resolver is none")
-        
+
         module = self.resolver.resolve(node.module_path)
 
         # import math

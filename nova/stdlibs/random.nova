@@ -1,0 +1,19 @@
+export fn random() -> N {
+    return __random()
+}
+
+export fn randint(min: N, max: N) -> N {
+    return __randint(min, max)
+}
+
+export fn choice(values: [U]) -> U {
+    return __choice(values)
+}
+
+export fn shuffle(values: [U]) -> [U] {
+    return __shuffle(values)
+}
+
+export fn seed(value: N) {
+    __seed(value)
+}

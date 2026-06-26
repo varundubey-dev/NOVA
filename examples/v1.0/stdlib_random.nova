@@ -1,0 +1,188 @@
+import random
+
+// ======================================================
+// NOVA STANDARD LIBRARY RANDOM
+// ======================================================
+
+print(
+    "RANDOM",
+    random.random()
+)
+
+// ======================================================
+// RANDINT
+// ======================================================
+
+print(
+    "1-10",
+    random.randint(
+        1,
+        10
+    )
+)
+
+print(
+    "100-200",
+    random.randint(
+        100,
+        200
+    )
+)
+
+// ======================================================
+// CHOICE
+// ======================================================
+
+numbers: [N] = [
+    10,
+    20,
+    30,
+    40,
+    50
+]
+
+print(
+    "CHOICE",
+    random.choice(numbers)
+)
+
+words: [S] = [
+    "Nova",
+    "Python",
+    "Rust",
+    "Go"
+]
+
+print(
+    random.choice(words)
+)
+
+// ======================================================
+// SHUFFLE
+// ======================================================
+
+print(
+    "BEFORE",
+    numbers
+)
+
+random.shuffle(numbers)
+
+print(
+    "AFTER",
+    numbers
+)
+
+// ======================================================
+// SEED
+// ======================================================
+
+random.seed(42)
+
+print(
+    random.random()
+)
+
+print(
+    random.randint(
+        1,
+        100
+    )
+)
+
+random.seed(42)
+
+print(
+    random.random()
+)
+
+print(
+    random.randint(
+        1,
+        100
+    )
+)
+
+// ======================================================
+// FUNCTION
+// ======================================================
+
+fn pick() -> N {
+
+    values: [N] = [
+        1,
+        2,
+        3,
+        4,
+        5
+    ]
+
+    return random.choice(values)
+
+}
+
+print(
+    pick()
+)
+
+// ======================================================
+// EXPRESSIONS
+// ======================================================
+
+print(
+
+    random.randint(
+        1,
+        10
+    ) + 5
+
+)
+
+print(
+
+    random.choice(words) ==
+    "Nova"
+        ? "FOUND"
+        : "OTHER"
+
+)
+
+// ======================================================
+// EXPECTED OUTPUT
+// ======================================================
+
+/*
+
+RANDOM 0.48392017
+
+1-10 7
+
+100-200 153
+
+CHOICE 40
+
+Rust
+
+BEFORE [10, 20, 30, 40, 50]
+
+AFTER [30, 10, 50, 20, 40]
+
+0.639426798...
+
+4
+
+0.639426798...
+
+4
+
+3
+
+12
+
+FOUND
+
+The exact random values will differ unless the same
+seed is used. After calling random.seed(42), the
+generated sequence becomes deterministic.
+
+*/
