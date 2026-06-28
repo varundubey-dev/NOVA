@@ -30,6 +30,7 @@ class TokenType(Enum):
     FROM = auto()
     EXPORT = auto()
     AS = auto()
+    COMMENT = auto()
 
     # Datatypes
     TYPE = auto()

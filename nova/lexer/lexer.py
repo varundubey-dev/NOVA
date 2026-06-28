@@ -196,20 +196,49 @@ class Lexer:
 
         return Token(TokenType.STRING, value, start_line, start_column)
 
-    def skip_single_line_comment(self):
+    def read_single_line_comment(self):
+        start_line = self.line
+        start_column = self.column
+
+        value = "//"
+
+        self.advance()  # /
+        self.advance()  # /
+
         while self.current_char is not None and self.current_char != "\n":
+            value += self.current_char
             self.advance()
 
-    def skip_multi_line_comment(self):
+        return Token(
+            TokenType.COMMENT,
+            value,
+            start_line,
+            start_column,
+        )
+
+    def read_multi_line_comment(self):
+        start_line = self.line
+        start_column = self.column
+
+        value = "/*"
+
         self.advance()  # /
         self.advance()  # *
 
         while self.current_char is not None:
             if self.current_char == "*" and self.peek() == "/":
+                value += "*/"
                 self.advance()
                 self.advance()
-                return
 
+                return Token(
+                    TokenType.COMMENT,
+                    value,
+                    start_line,
+                    start_column,
+                )
+
+            value += self.current_char
             self.advance()
 
         raise UnterminatedCommentError(
@@ -231,12 +260,10 @@ class Lexer:
                 return token
 
             if self.current_char == "/" and self.peek() == "/":
-                self.skip_single_line_comment()
-                continue
+                return self.read_single_line_comment()
 
             if self.current_char == "/" and self.peek() == "*":
-                self.skip_multi_line_comment()
-                continue
+                return self.read_multi_line_comment()
 
             if self.current_char.isalpha() or self.current_char == "_":
                 return self.read_identifier()

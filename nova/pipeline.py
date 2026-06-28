@@ -1,4 +1,5 @@
 from nova.lexer.lexer import Lexer
+from nova.lexer.token_types import TokenType
 from nova.parser.parser import Parser
 from nova.interpreter.interpreter import Interpreter
 
@@ -13,7 +14,9 @@ def create_interpreter(
     lexer = Lexer(source)
     tokens = lexer.tokenize()
 
-    parser = Parser(tokens)
+    parser_tokens = [token for token in tokens if token.type != TokenType.COMMENT]
+
+    parser = Parser(parser_tokens)
     ast = parser.parse()
 
     interpreter = Interpreter(
